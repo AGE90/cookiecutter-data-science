@@ -1,0 +1,9 @@
+{% if cookiecutter.project_packages == "all" -%}
+# External requirements
+pathlib
+pyprojroot
+pyhere
+ipykernel
+pandas
+openpyxl
+{% endif -%}
