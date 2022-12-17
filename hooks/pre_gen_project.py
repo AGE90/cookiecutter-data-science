@@ -12,10 +12,11 @@ RESET_ALL = "\x1b[0m"
 
 MODULE_REGEX = r'^[_a-zA-Z][_a-zA-Z0-9]+$'
 
-project_slug = "{{ cookiecutter.project_slug }}"
+project_module_name = "{{ cookiecutter.project_module_name }}"
 
-if not re.match(MODULE_REGEX, project_slug):
-    print(f"{ERROR_COLOR}ERROR: {project_slug=} is not a valid name. Please avoid using special characters{RESET_ALL}")
+if not re.match(MODULE_REGEX, project_module_name):
+    print(f"{ERROR_COLOR}ERROR: {project_module_name=} is not a valid Python module name!")
+    print(f"Please avoid using special characters{RESET_ALL}")
     sys.exit(1)
     
 print(f"{MESSAGE_COLOR}Well done!")
