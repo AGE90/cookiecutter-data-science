@@ -1,9 +1,15 @@
-{% if cookiecutter.project_packages == "all" -%}
-# External requirements
-pathlib
 pyprojroot
-pyhere
-ipykernel
+pathlib
+nbdime
+black
+invoke
+jupyter
+jupyterlab
+{% if cookiecutter.project_packages == "All" -%}
+# External requirements
 pandas
+missingno
 openpyxl
+matplotlib
+seaborn
 {% endif -%}

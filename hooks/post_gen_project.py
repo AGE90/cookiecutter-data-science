@@ -1,7 +1,6 @@
 import subprocess
 
 from colorama import just_fix_windows_console
-
 just_fix_windows_console()
 
 MESSAGE_COLOR = "\x1b[1;35m"

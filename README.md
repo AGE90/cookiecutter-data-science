@@ -9,7 +9,11 @@
 $ pip install cookiecutter
 ```
 
-## To start a new project, run:
-------------
+## Start a new project
 
+In a folder where you want your project to be generated, just run:
+
+------------
     cookiecutter https://github.com/AGE90/-cookiecutter-data-science-pip
+
+## Directory structure
