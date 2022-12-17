@@ -55,7 +55,7 @@ To use the module inside your notebooks, add `%autoreload` at the top of your no
 Example of module usage :
 
 ```python
-from {{ cookiecutter.project_module_name }}.utils.paths import data_dir
+from {{ cookiecutter.module_name }}.utils.paths import data_dir
 data_dir()
 ```
 
