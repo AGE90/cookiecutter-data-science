@@ -61,36 +61,41 @@ data_dir()
 
 ## Set up Git diff for notebooks and lab
 
-We use [nbdime](https://nbdime.readthedocs.io/en/stable/index.html) for diffing and merging Jupyter notebooks.
+We use [nbdime](https://nbdime.readthedocs.io/en/stable/index.html) for diffing and merging Jupyter notebooks. First install this package as follows
+
+```bash
+$ pip install nbdime
+```
 
 To configure it to this git project use the command:
 
-```
-nbdime config-git --enable
+```bash
+$ nbdime config-git --enable
 ```
 
 To enable notebook extension :
 
-```
-nbdime extensions --enable --sys-prefix
+```bash
+$ nbdime extensions --enable --sys-prefix
 ```
 
 Or, if you prefer full control, you can run the individual steps:
 
-```
-jupyter serverextension enable --py nbdime --sys-prefix
+```bash
+$ jupyter serverextension enable --py nbdime --sys-prefix
 
-jupyter nbextension install --py nbdime --sys-prefix
-jupyter nbextension enable --py nbdime --sys-prefix
+$ jupyter nbextension install --py nbdime --sys-prefix
 
-jupyter labextension install nbdime-jupyterlab
+$ jupyter nbextension enable --py nbdime --sys-prefix
+
+$ jupyter labextension install nbdime-jupyterlab
 ```
 
 You may need to rebuild the extension : `jupyter lab build`
 
 ## Set up Plotly for Jupyterlab
 
-Plotly works in notebook but further steps are needed for it to work in Jupyterlab :
+Plotly works in notebook but further steps are needed for it to work in Jupyterlab:
 
 * @jupyter-widgets/jupyterlab-manager # Jupyter widgets support
 * plotlywidget  # FigureWidget support

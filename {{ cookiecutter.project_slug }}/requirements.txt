@@ -1,6 +1,5 @@
 pyprojroot
 pathlib
-nbdime
 black
 invoke
 jupyter
