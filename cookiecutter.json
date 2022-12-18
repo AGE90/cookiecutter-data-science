@@ -7,7 +7,6 @@
     "project_description": "A short description of the project.",
     "license": ["No license file", "MIT", "BSD-3-Clause"],
     "project_packages": ["All", "Minimal"],
-    "python_version": "3.11",
     "project_version": "0.1.0",
     "initialize_git_repository": ["Yes", "No"]
 }

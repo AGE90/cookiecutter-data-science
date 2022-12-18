@@ -6,7 +6,6 @@ invoke
 jupyter
 jupyterlab
 {% if cookiecutter.project_packages == "All" -%}
-# External requirements
 pandas
 missingno
 openpyxl
