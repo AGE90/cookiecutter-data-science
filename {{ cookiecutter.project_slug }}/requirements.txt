@@ -1,9 +1,7 @@
 pyprojroot
 pathlib
 black
-invoke
-jupyter
-jupyterlab
+ipykernel
 {% if cookiecutter.project_packages == "All" -%}
 pandas
 missingno

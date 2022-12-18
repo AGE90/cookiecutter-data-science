@@ -9,7 +9,7 @@
 Go to the project directory and run the following command:
 
 ```bash
-$ python -m venv .venv
+python -m venv .venv
 ```
 
 To activate the environment use the following command
@@ -17,32 +17,39 @@ To activate the environment use the following command
 On Unix or MacOS:
 
 ```bash
-$ source .venv/bin/activate
+source .venv/bin/activate
 ```
 
 On Windows:
 
 ```bash
-$ . .venv/Scripts/activate
+. .venv/Scripts/activate
 ```
 
 ## Install required packages
 
 ```bash
-$ python -m pip install --upgrade pip
-$ pip install -r requirements.txt --no-cache-dir
+python -m pip install --upgrade pip
+pip install -r requirements.txt --no-cache-dir
 ```
 
-The packages necessary to run the project are now installed inside the conda environment.
+In case you require Jupyter and Jupyterlab, run the commands:
 
-**Note: The following sections assume you are located in your conda environment.**
+```bash
+pip install jupyter
+pip install jupyterlab
+```
+
+The packages necessary to run the project are now installed inside the environment.
+
+**Note: The following sections assume you are located in your environment.**
 
 ## Set up project's module
 
 To move beyond notebook prototyping, all reusable code should go into the `{{ cookiecutter.module_name }}/` folder package. To use that package inside your project, install the project's module in editable mode, so you can edit files in the `{{ cookiecutter.module_name }}` folder and use the modules inside your notebooks :
 
 ```bash
-$ pip install --editable .
+pip install --editable .
 ```
 
 To use the module inside your notebooks, add `%autoreload` at the top of your notebook :
@@ -64,31 +71,31 @@ data_dir()
 We use [nbdime](https://nbdime.readthedocs.io/en/stable/index.html) for diffing and merging Jupyter notebooks. First install this package as follows
 
 ```bash
-$ pip install nbdime
+pip install nbdime
 ```
 
 To configure it to this git project use the command:
 
 ```bash
-$ nbdime config-git --enable
+nbdime config-git --enable
 ```
 
 To enable notebook extension :
 
 ```bash
-$ nbdime extensions --enable --sys-prefix
+nbdime extensions --enable --sys-prefix
 ```
 
 Or, if you prefer full control, you can run the individual steps:
 
 ```bash
-$ jupyter serverextension enable --py nbdime --sys-prefix
+jupyter serverextension enable --py nbdime --sys-prefix
 
-$ jupyter nbextension install --py nbdime --sys-prefix
+jupyter nbextension install --py nbdime --sys-prefix
 
-$ jupyter nbextension enable --py nbdime --sys-prefix
+jupyter nbextension enable --py nbdime --sys-prefix
 
-$ jupyter labextension install nbdime-jupyterlab
+jupyter labextension install nbdime-jupyterlab
 ```
 
 You may need to rebuild the extension : `jupyter lab build`

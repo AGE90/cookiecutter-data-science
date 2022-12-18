@@ -6,7 +6,7 @@
  - [Cookiecutter Python package](http://cookiecutter.readthedocs.org/en/latest/installation.html): This can be installed with pip by running:
 
 ``` bash
-$ pip install cookiecutter
+pip install cookiecutter
 ```
 
 ## Start a new project
