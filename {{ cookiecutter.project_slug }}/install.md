@@ -30,6 +30,9 @@ On Windows:
 
 ```bash
 python -m pip install --upgrade pip
+```
+
+```bash
 pip install -r requirements.txt --no-cache-dir
 ```
 
