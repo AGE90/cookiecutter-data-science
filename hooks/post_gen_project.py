@@ -1,18 +1,21 @@
 import subprocess
 
+from colorama import Fore, Style
 from colorama import just_fix_windows_console
+
+# Use Colorama to make Termcolor work on Windows too
 just_fix_windows_console()
 
-MESSAGE_COLOR = "\x1b[1;35m"
-RESET_ALL = "\x1b[0m"
+MESSAGE_COLOR = Fore.CYAN
+RESET_ALL = Style.RESET_ALL
 
 initialize_git_repository = "{{ cookiecutter.initialize_git_repository }}"
 
 if(initialize_git_repository == 'Yes'):
-    print(f"{MESSAGE_COLOR}Initializing a git repository...{RESET_ALL}")
+    print(MESSAGE_COLOR + "Initializing a git repository..." + RESET_ALL)
 
     subprocess.call(['git', 'init'])
     subprocess.call(['git', 'add', '*'])
     subprocess.call(['git', 'commit', '-m', 'Initial commit'])
 
-print(f"{MESSAGE_COLOR}All set!{RESET_ALL}")
+print(MESSAGE_COLOR + "All set!" + RESET_ALL)
