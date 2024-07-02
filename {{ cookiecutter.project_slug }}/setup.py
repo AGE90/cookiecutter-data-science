@@ -1,18 +1,16 @@
-import os
-
+import pathlib
 from setuptools import setup, find_packages
 
 def readme() -> str:
     """Utility function to read the README.md.
-    Used for the `long_description`. It's nice, because now
-    1) we have a top level README file and
-    2) it's easier to type in the README file than to put a raw string in below.
-    Args:
-        nothing
+    Used for the `long_description`.
+
     Returns:
-        String of readed README.md file.
+        The content of the README.md file as a string.
     """
-    return open(os.path.join(os.path.dirname(__file__), 'README.md')).read()
+    readme_path = pathlib.Path(__file__).parent / 'README.md'
+    with readme_path.open(encoding='utf-8') as f:
+        return f.read()
 
 setup(
     name='{{ cookiecutter.module_name }}',
@@ -22,7 +20,27 @@ setup(
     description='{{ cookiecutter.project_description }}',
     python_requires='>=3',
     license="{% if cookiecutter.license == 'MIT' %}MIT{% elif cookiecutter.license == 'BSD-3-Clause' %}BSD-3{% endif %}",
-    url='',
+    url='{{ cookiecutter.project_url }}',
     packages=find_packages(),
     long_description=readme(),
+    long_description_content_type='text/markdown',
+    classifiers=[
+        'Programming Language :: Python :: 3',
+        'License :: OSI Approved :: MIT License',
+        'License :: OSI Approved :: BSD License',
+        'Operating System :: OS Independent',
+    ],
+    install_requires=[
+        # List your package dependencies here
+    ],
+    extras_require={
+        'dev': [
+            # List your development dependencies here
+        ],
+    },
+    entry_points={
+        'console_scripts': [
+            # Define entry points for CLI scripts here
+        ],
+    },
 )
