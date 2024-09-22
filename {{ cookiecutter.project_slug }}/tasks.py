@@ -1,4 +1,18 @@
+"""
+This script uses the invoke library, which is a Python library for 
+task execution, to create two tasks: one for launching a Jupyter Lab 
+server and another for launching a Jupyter Notebook server.
+
+You can execute these tasks from the command line using invoke, like so:
+
+```bash
+invoke lab --ip 127.0.0.1 --port 9000
+invoke notebook --ip 127.0.0.1 --port 9000
+```
+"""
+
 from invoke import task
+
 
 @task(help={
     'ip': 'IP to listen on, defaults to *',
