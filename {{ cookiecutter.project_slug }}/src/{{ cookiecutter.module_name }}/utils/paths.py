@@ -1,3 +1,19 @@
+"""
+This module leverages `pyprojroot` to dynamically locate the root directory of the project
+and create paths relative to it. By using the `here()` function from `pyprojroot`, the
+project root is automatically detected based on common root indicators (e.g., `.git/`, 
+`pyproject.toml`, or `setup.py`).
+
+This enables consistent and portable path handling across the project, ensuring that 
+relative paths are resolved reliably, regardless of the script's location within the 
+project structure.
+
+Dependencies:
+-------------
+- pyprojroot: Detects the root of the project.
+- pathlib: Provides an object-oriented interface for handling filesystem paths.
+"""
+
 from pyprojroot import here
 from pathlib import Path
 from typing import Union, Callable, Iterable, List, Dict
@@ -34,7 +50,8 @@ project_dir = make_dir_function("")
 
 # Define a comprehensive list of directory types
 dir_types: List[List[str]] = [
-    ["data"],                  # Base data folder
+    ["app"],                    # API functionalities
+    ["data"],                   # Base data folder
     ["data", "raw"],            # Raw data folder
     ["data", "processed"],      # Processed data folder
     ["data", "interim"],        # Interim data folder

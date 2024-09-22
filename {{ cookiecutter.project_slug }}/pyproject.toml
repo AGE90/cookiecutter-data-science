@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=42", "wheel"]
+requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -7,31 +7,63 @@ name = "{{ cookiecutter.module_name }}"
 version = "{{ cookiecutter.project_version }}"
 description = "{{ cookiecutter.project_description }}"
 readme = "README.md"
-requires-python = ">=3.6"
+requires-python = ">=3.7"
+license = {text = "{% if cookiecutter.license == 'MIT' %}MIT{% elif cookiecutter.license == 'BSD-3-Clause' %}BSD-3-Clause{% else %}{{ cookiecutter.license }}{% endif %}"}
 authors = [
     {name = "{{ cookiecutter.author_name }}", email = "{{ cookiecutter.author_email }}"}
 ]
-license = {text = "{% if cookiecutter.license == 'MIT' %}MIT{% elif cookiecutter.license == 'BSD-3-Clause' %}BSD-3{% endif %}"}
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
-    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "License :: OSI Approved :: {% if cookiecutter.license == 'MIT' %}MIT License{% elif cookiecutter.license == 'BSD-3-Clause' %}BSD 3-Clause License{% else %}{{ cookiecutter.license }}{% endif %}",
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    # List your package dependencies here
+    "pyprojroot",
+    "pathlib",
 ]
 
 [project.optional-dependencies]
 dev = [
-    # List your development dependencies here
+    "pytest>=6.0",
+    "pytest-cov",
+    "mypy",
+    "flake8",
+    "black",
 ]
 
 [project.urls]
 Homepage = "{{ cookiecutter.project_url }}"
+"Bug Tracker" = "{{ cookiecutter.project_url }}/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+include = ["*"]
+exclude = ["tests*"]
 
 [tool.setuptools]
 package-dir = {"" = "src"}
+
+[tool.pytest.ini_options]
+addopts = "--cov=src"
+testpaths = [
+    "tests",
+]
+
+[tool.mypy]
+mypy_path = "src"
+check_untyped_defs = true
+disallow_any_generics = true
+ignore_missing_imports = true
+no_implicit_optional = true
+show_error_codes = true
+strict_equality = true
+warn_redundant_casts = true
+warn_return_any = true
+warn_unreachable = true
+warn_unused_configs = true
+no_implicit_reexport = true
