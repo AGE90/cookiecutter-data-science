@@ -6,6 +6,9 @@
 ├── CHANGELOG.md           <- A changelog to track project updates and versions.
 ├── pyproject.toml         <- Project configuration file (replaces setup.py and requirements.txt).
 ├── .gitignore             <- Specifies intentionally untracked files to ignore.
+├── Makefile               <- Automate common tasks like testing, running, or setting up.
+├── .env                   <- Environment variables (ignored by git).
+├── .pre-commit-config.yaml <- Pre-commit hooks for linting/formatting.
 ├── app                    <- Main application code (if applicable).
 │   └── main.py            <- Entry point for the application.
 ├── config                 <- Configuration files for the project.
@@ -15,8 +18,11 @@
 │   ├── external           <- Data from third party sources.
 │   ├── interim            <- Intermediate data that has been transformed.
 │   ├── processed          <- The final, canonical data sets for modeling.
-│   └── raw                <- The original, immutable data dump.
+│   ├── raw                <- The original, immutable data dump.
+│   └── .dvc/              <- DVC meta-files for data tracking.
 ├── docs                   <- Project documentation.
+│   ├── index.md           <- Main index or README for the documentation.
+│   ├── project_structure.md    <- Project structure tree.
 │   ├── install.md         <- Detailed instructions to set up this project.
 │   ├── api.md             <- API documentation.
 │   ├── user_guide.md      <- User guide for the project.
@@ -49,8 +55,5 @@
 └── tests                  <- Test files should mirror the structure of `src`.
     ├── __init__.py
     ├── conftest.py        <- Shared pytest fixtures.
-    └── {{ cookiecutter.module_name }}
-        ├── test_data.py
-        ├── test_features.py
-        ├── test_models.py
-        └── test_visualization.py
+    ├── e2e/                     <- End-to-end or integration tests.
+    └── unit/                    <- Unit tests, mirroring src structure.
