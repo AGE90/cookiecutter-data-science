@@ -8,5 +8,6 @@
     "license": ["No license file", "MIT", "BSD-3-Clause"],
     "project_packages": ["All", "Minimal"],
     "project_version": "0.1.0",
+    "initialize_virtualenv": ["Yes", "No"],
     "initialize_git_repository": ["Yes", "No"]
 }
