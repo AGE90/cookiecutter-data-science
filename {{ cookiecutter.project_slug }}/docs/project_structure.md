@@ -55,5 +55,5 @@
 └── tests                  <- Test files should mirror the structure of `src`.
     ├── __init__.py
     ├── conftest.py        <- Shared pytest fixtures.
-    ├── e2e/                     <- End-to-end or integration tests.
-    └── unit/                    <- Unit tests, mirroring src structure.
+    ├── e2e/               <- End-to-end or integration tests.
+    └── unit/              <- Unit tests, mirroring src structure.

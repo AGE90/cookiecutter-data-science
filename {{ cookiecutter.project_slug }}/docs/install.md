@@ -1,152 +1,206 @@
-# {{ cookiecutter.project_name }} installation guide
+# {{ cookiecutter.project_name }} Installation Guide
+
+Welcome to the **{{ cookiecutter.project_name }}** installation guide! This guide will walk you through setting up the environment, installing necessary dependencies, and configuring essential tools to ensure a smooth development experience.
+
+---
 
 ## Prerequisites
 
-- Python >=3
+Make sure you have the following installed before proceeding:
 
-## Create and activate and environment
+- **Python**: Version >= 3.9
 
-Go to the project directory and run the following command:
+---
+
+## 1. Create and Activate a Virtual Environment
+
+Navigate to your project directory and create a virtual environment:
 
 ```bash
 python -m venv .venv
 ```
 
-To activate the environment use the following command
+### Activate the virtual environment
 
-On Unix or MacOS:
+#### On Unix/MacOS
 
 ```bash
 source .venv/bin/activate
 ```
 
-On Windows:
+#### On Windows
 
 ```bash
 . .venv/Scripts/activate
 ```
 
-## Install required packages
+Once activated, your shell prompt should change to indicate that you're working inside the virtual environment.
+
+---
+
+## 2. Install Required Packages
+
+First, upgrade `pip` to the latest version:
 
 ```bash
 python -m pip install --upgrade pip
 ```
 
+Then, install the required packages from `requirements.txt`:
+
 ```bash
 pip install -r requirements.txt --no-cache-dir
 ```
 
-In case you require Jupyter and Jupyterlab, run the commands:
+### Install Jupyter and JupyterLab (Optional)
+
+If you plan to use Jupyter or JupyterLab, install them with the following commands:
 
 ```bash
 pip install jupyter
 pip install jupyterlab
 ```
 
-The packages necessary to run the project are now installed inside the environment.
+Your project dependencies are now installed within the virtual environment.
 
-**Note: The following sections assume you are located in your environment.**
+**Note:** The following sections assume that your virtual environment is active.
 
-## Set up project's module
+---
 
-To move beyond notebook prototyping, all reusable code should go into the `{{ cookiecutter.module_name }}/` folder package. To use that package inside your project, install the project's module in editable mode, so you can edit files in the `{{ cookiecutter.module_name }}` folder and use the modules inside your notebooks :
+## 3. Set Up Project’s Module
+
+To move beyond notebook prototyping, reusable code should reside in the `{{ cookiecutter.module_name }}/` package. To work with this package in development mode, you can install it in **editable** mode. This allows you to make changes to the module and use them without reinstalling the package.
+
+Run the following command in your project root:
 
 ```bash
-pip install --editable .
+pip install -e .[dev]
 ```
 
-To use the module inside your notebooks, add `%autoreload` at the top of your notebook :
+### Use the Module Inside Jupyter Notebooks
+
+To ensure that your changes in the `{{ cookiecutter.module_name }}` module are automatically reloaded in Jupyter notebooks, add `%autoreload` at the top of your notebook:
 
 ```python
 %load_ext autoreload
 %autoreload 2
 ```
 
-Example of module usage :
+### Example of Module Usage
 
 ```python
 from {{ cookiecutter.module_name }}.utils.paths import data_dir
 data_dir()
 ```
 
-## Set up Git diff for notebooks and lab
+---
 
-We use [nbdime](https://nbdime.readthedocs.io/en/stable/index.html) for diffing and merging Jupyter notebooks. First install this package as follows
+## 4. Set Up Git Diff for Jupyter Notebooks
+
+To efficiently manage and track changes in Jupyter notebooks, we recommend using **[nbdime](https://nbdime.readthedocs.io/en/stable/index.html)** for diffing and merging.
+
+### Install nbdime
 
 ```bash
 pip install nbdime
 ```
 
-To configure it to this git project use the command:
+### Configure Git for nbdime
 
 ```bash
 nbdime config-git --enable
 ```
 
-To enable notebook extension :
+### Enable nbdime extensions
+
+To enable the Jupyter extensions for diffing notebooks:
 
 ```bash
 nbdime extensions --enable --sys-prefix
 ```
 
-Or, if you prefer full control, you can run the individual steps:
+Alternatively, if you need more granular control, you can manually enable the extensions with:
 
 ```bash
 jupyter serverextension enable --py nbdime --sys-prefix
-
 jupyter nbextension install --py nbdime --sys-prefix
-
 jupyter nbextension enable --py nbdime --sys-prefix
-
 jupyter labextension install nbdime-jupyterlab
 ```
 
-You may need to rebuild the extension : `jupyter lab build`
+If needed, rebuild the JupyterLab extensions with:
 
-## Set up Plotly for Jupyterlab
-
-Plotly works in notebook but further steps are needed for it to work in Jupyterlab:
-
-* @jupyter-widgets/jupyterlab-manager # Jupyter widgets support
-* plotlywidget  # FigureWidget support
-* @jupyterlab/plotly-extension  # offline iplot support
-
-There are conflict versions between those extensions so check the [latest Plotly README](https://github.com/plotly/plotly.py#installation-of-plotlypy-version-3) to ensure you fetch the correct ones. 
-
-```
-jupyter labextension install @jupyter-widgets/jupyterlab-manager@0.36 --no-build
-jupyter labextension install plotlywidget@0.2.1  --no-build
-jupyter labextension install @jupyterlab/plotly-extension@0.16  --no-build
+```bash
 jupyter lab build
 ```
 
-# Invoke command
+---
 
-We use [Invoke](http://www.pyinvoke.org/) to manage an
-unique entry point into all of the project tasks.
+## 5. Set Up Plotly for JupyterLab
 
-List of all tasks for project :
+Plotly requires some additional steps to work correctly with JupyterLab.
 
+### Install Required Extensions
+
+Run the following commands to install the necessary JupyterLab extensions for Plotly:
+
+```bash
+jupyter labextension install @jupyter-widgets/jupyterlab-manager@0.36 --no-build
+jupyter labextension install plotlywidget@0.2.1 --no-build
+jupyter labextension install @jupyterlab/plotly-extension@0.16 --no-build
+jupyter lab build
 ```
-$ invoke -l
 
+**Note:** There can be version conflicts between JupyterLab and Plotly extensions, so always check the [latest Plotly documentation](https://github.com/plotly/plotly.py#installation-of-plotlypy-version-3) to ensure compatibility.
+
+---
+
+## 6. Managing Project Tasks with Invoke
+
+We use **[Invoke](http://www.pyinvoke.org/)** as a task runner for common project management tasks. You can view available tasks and manage them from a single entry point.
+
+### List Available Tasks
+
+```bash
+invoke -l
+```
+
+For example, you might see:
+
+```text
 Available tasks:
 
   lab     Launch Jupyter lab
 ```
 
-Help on a particular task :
+### Get Help on a Specific Task
 
+```bash
+invoke --help lab
 ```
-$ invoke --help lab
-Usage: inv[oke] [--core-opts] notebook [--options] [other tasks here ...]
+
+The output might look like:
+
+```text
+Usage: inv[oke] [--core-opts] lab [--options] [other tasks here ...]
 
 Docstring:
-  Launch Jupyter lab
+  Launch Jupyter Lab.
 
 Options:
   -i STRING, --ip=STRING   IP to listen on, defaults to *
   -p, --port               Port to listen on, defaults to 8888
 ```
 
-You will find the definition of each task inside the `tasks.py` file, so you can add your own.
+### Adding Custom Tasks
+
+To add your own tasks, edit the `tasks.py` file. This file contains the definition of each task. You can create custom tasks based on your project's requirements.
+
+---
+
+### Final Notes
+
+- Ensure that your virtual environment is activated when running any project-related commands.
+- Explore `tasks.py` to customize and extend the task automation for your needs.
+  
+You're now all set to start developing with **{{ cookiecutter.project_name }}**!
