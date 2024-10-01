@@ -5,10 +5,11 @@
     "author_name": "Your name (or your organization/company/team)",
     "author_email": "Yout email (or your organization/company/team)",
     "project_description": "A short description of the project.",
-    "license": ["No license file", "MIT", "BSD-3-Clause"],
-    "project_packages": ["All", "Minimal"],
+    "project_url": "https://example.com",
     "project_version": "0.1.0",
+    "python_version": "3.11",
+    "project_packages": ["All", "Minimal"],
     "initialize_virtualenv": ["Yes", "No"],
     "initialize_git_repository": ["Yes", "No"],
-    "project_url": "https://example.com"
+    "license": ["No license file", "MIT", "BSD-3-Clause"]
 }

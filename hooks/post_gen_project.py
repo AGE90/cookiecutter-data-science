@@ -41,9 +41,16 @@ def create_virtualenv():
 def install_requirements():
     """Installs the required packages in the virtual environment."""
     try:
+        # Determine the correct path for pip based on the OS
+        if os.name == 'nt':  # Windows
+            pip_executable = os.path.join('.venv', 'Scripts', 'pip')
+        else:  # Unix-based systems (Linux/MacOS)
+            pip_executable = os.path.join('.venv', 'bin', 'pip')
+
+        # Check if 'requirements.txt' exists before trying to install
         if os.path.exists('requirements.txt'):
             print(f"{MESSAGE_COLOR}Installing dependencies from 'requirements.txt'...{RESET_ALL}")
-            subprocess.check_call(['.venv/bin/pip', 'install', '-r', 'requirements.txt'])
+            subprocess.check_call([pip_executable, 'install', '-r', 'requirements.txt'])
             print(f"{MESSAGE_COLOR}Dependencies installed successfully.{RESET_ALL}")
         else:
             print(f"{MESSAGE_COLOR}No 'requirements.txt' found. Skipping dependency installation.{RESET_ALL}")
