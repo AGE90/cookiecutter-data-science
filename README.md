@@ -7,7 +7,7 @@ A **Cookiecutter** template to jumpstart data science projects with a well-organ
 ## Features
 
 - **Organized Project Structure**: Predefined directories for data, notebooks, models, reports, and more.
-- **Configurable**: Choose from multiple options for setting up your project (e.g., initializing a Git repo, setting up virtual environments).
+- **Configurable**: Choose from multiple options for setting up your project (e.g., setting up virtual environmentsa and initializing a Git repo).
 - **Best Practices**: Follows best practices for reproducibility, data versioning, and testing.
 - **Extensible**: Customizable structure that can easily adapt to different workflows.
 
@@ -108,12 +108,67 @@ This template provides a well-structured project layout with the following direc
 
 ---
 
-## Optional Features
+## Project Setup Options
 
-When you generate a new project using this template, you'll be prompted with the following options:
+### Package Configuration
 
-- **Initialize a Git repository**: Automatically set up a new Git repository for version control.
-- **Set up a virtual environment**: Option to configure a Python virtual environment for managing dependencies.
+- **Minimal Setup**:
+  - Includes only the `ipykernel` package in `requirements.txt`.
+  - Suitable for lightweight projects or when you want to manually manage dependencies.
+
+- **Full Setup**:
+  - Includes a set of data science packages in `requirements.txt`:
+    - pandas: For data manipulation and analysis
+    - missingno: For visualizing missing data
+    - openpyxl: For reading/writing Excel files
+    - matplotlib: For creating static, animated, and interactive visualizations
+    - seaborn: For statistical data visualization
+  - Ideal for data science projects requiring a basis set of tools.
+
+### Virtual Environment
+
+- **Option**: Configure a Python virtual environment for isolated dependency management.
+- **If selected**:
+  - Creates a virtual environment named `.venv` in the project directory.
+  - Installs the project in editable mode (`pip install -e .`).
+  - Installs development dependencies specified in `pyproject.toml`.
+  - Installs packages listed in `requirements.txt`.
+- **Benefits**:
+  - Isolates project dependencies from system-wide Python packages.
+  - Ensures reproducibility across different development environments.
+  - Simplifies dependency management and project setup for collaborators.
+
+### Git Repository Initialization
+
+- **Option**: Automatically initialize a Git repository for version control.
+- **If selected**:
+  - Initializes a new Git repository in the project directory.
+  - Creates an initial commit with all project files.
+- **Benefits**:
+  - Enables immediate version control for your project.
+  - Facilitates collaboration and code tracking from the start.
+  - Sets up a foundation for good development practices.
+
+### Post-Setup Steps
+
+After the project is created:
+
+1. Activate the virtual environment (if created):
+
+   ```bash
+   source .venv/bin/activate  # On Unix or MacOS
+   .venv\Scripts\activate     # On Windows
+   ```
+
+2. Verify the installation:
+
+   ```bash
+   python -m pip list
+   ```
+
+3. Start developing your project!
+
+Remember to commit your changes regularly if you've initialized a Git repository.
 
 ---
 

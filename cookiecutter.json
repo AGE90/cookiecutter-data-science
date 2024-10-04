@@ -8,8 +8,8 @@
     "project_url": "https://example.com",
     "project_version": "0.1.0",
     "python_version": "3.11",
-    "project_packages": ["All", "Minimal"],
     "initialize_virtualenv": ["Yes", "No"],
+    "project_packages": ["All", "Minimal"],
     "initialize_git_repository": ["Yes", "No"],
     "license": ["No license file", "MIT", "BSD-3-Clause"]
 }
