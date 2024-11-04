@@ -14,9 +14,11 @@ Dependencies:
 - pathlib: Provides an object-oriented interface for handling filesystem paths.
 """
 
-from pyprojroot import here
 from pathlib import Path
-from typing import Union, Callable, Iterable, List, Dict
+from typing import Callable, Dict, Iterable, List, Union
+
+from pyprojroot import here
+
 
 def make_dir_function(dir_name: Union[str, Iterable[str]]) -> Callable[..., Path]:
     """
@@ -73,26 +75,26 @@ dir_functions: Dict[str, Callable[..., Path]] = {}
 
 # Dynamically create directory functions and store them in the dictionary
 for dir_type in dir_types:
-    dir_var_name = '_'.join(dir_type) + "_dir"  # Create variable name like 'data_raw_dir'
-    dir_functions[dir_var_name] = make_dir_function(dir_type)
+    DIR_VAR_NAME = '_'.join(dir_type) + "_dir"  # Create variable name like 'data_raw_dir'
+    dir_functions[DIR_VAR_NAME] = make_dir_function(dir_type)
 
 # Example usage:
 # You can now access directories dynamically via the dir_functions dictionary
-data_dir = dir_functions['data_dir']()
-data_raw_dir = dir_functions['data_raw_dir']()
-data_processed_dir = dir_functions['data_processed_dir']()
-data_interim_dir = dir_functions['data_interim_dir']()
-data_external_dir = dir_functions['data_external_dir']()
-models_dir = dir_functions['models_dir']()
-notebooks_dir = dir_functions['notebooks_dir']()
-references_dir = dir_functions['references_dir']()
-reports_dir = dir_functions['reports_dir']()
-reports_figures_dir = dir_functions['reports_figures_dir']()
-tests_dir = dir_functions['tests_dir']()
-docs_dir = dir_functions['docs_dir']()
-logs_dir = dir_functions['logs_dir']()
-config_dir = dir_functions['config_dir']()
-scripts_dir = dir_functions['scripts_dir']()
+data_dir = dir_functions['data_dir']
+data_raw_dir = dir_functions['data_raw_dir']
+data_processed_dir = dir_functions['data_processed_dir']
+data_interim_dir = dir_functions['data_interim_dir']
+data_external_dir = dir_functions['data_external_dir']
+models_dir = dir_functions['models_dir']
+notebooks_dir = dir_functions['notebooks_dir']
+references_dir = dir_functions['references_dir']
+reports_dir = dir_functions['reports_dir']
+reports_figures_dir = dir_functions['reports_figures_dir']
+tests_dir = dir_functions['tests_dir']
+docs_dir = dir_functions['docs_dir']
+logs_dir = dir_functions['logs_dir']
+config_dir = dir_functions['config_dir']
+scripts_dir = dir_functions['scripts_dir']
 
 # # Example print statements to show directory paths
 # print(f"Data Directory: {data_dir}")
