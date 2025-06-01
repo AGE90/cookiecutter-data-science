@@ -1,8 +1,0 @@
-ipykernel
-{% if cookiecutter.project_packages == "All" -%}
-pandas
-missingno
-openpyxl
-matplotlib
-seaborn
-{% endif -%}
