@@ -1,59 +1,52 @@
-[build-system]
-requires = ["setuptools>=61.0", "wheel"]
-build-backend = "setuptools.build_meta"
-
-[project]
-name = "{{ cookiecutter.module_name }}"
+[tool.poetry]
+name = "{{ cookiecutter.module_name | lower | replace(' ', '-') }}"
 version = "{{ cookiecutter.project_version }}"
 description = "{{ cookiecutter.project_description }}"
+authors = ["{{ cookiecutter.author_name }} <{{ cookiecutter.author_email }}>"]
+license = "{{ cookiecutter.license }}"
 readme = "README.md"
-requires-python = ">=3.7"
-license = {text = "{% if cookiecutter.license == 'MIT' %}MIT{% elif cookiecutter.license == 'BSD-3-Clause' %}BSD-3-Clause{% else %}{{ cookiecutter.license }}{% endif %}"}
-authors = [
-    {name = "{{ cookiecutter.author_name }}", email = "{{ cookiecutter.author_email }}"}
-]
+homepage = "{{ cookiecutter.project_url }}"
+repository = "{{ cookiecutter.project_url }}"
+documentation = "{{ cookiecutter.project_url }}/docs"
+# keywords = ["packaging", "poetry", "cookiecutter"]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
-    "License :: OSI Approved :: {% if cookiecutter.license == 'MIT' %}MIT License{% elif cookiecutter.license == 'BSD-3-Clause' %}BSD 3-Clause License{% else %}{{ cookiecutter.license }}{% endif %}",
+    "License :: OSI Approved :: {{ cookiecutter.license }}",
     "Operating System :: OS Independent",
 ]
-dependencies = [
-    "pyprojroot",
-    "pathlib",
+packages = [
+    { include = "{{ cookiecutter.module_name }}", from = "src" }
 ]
 
-[project.optional-dependencies]
-dev = [
-    "pytest>=6.0",
-    "pytest-cov",
-    "mypy",
-    "flake8",
-    "black",
-]
+[tool.poetry.dependencies]
+python = ">=3.9,<3.13"
+requests = "^2.32"
+pydantic = "^2.11"
+pyprojroot = "^0.3"
 
-[project.urls]
-Homepage = "{{ cookiecutter.project_url }}"
-"Bug Tracker" = "{{ cookiecutter.project_url }}/issues"
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.16"
+ruff = "^0.11"
+black = "^25.1"
 
-[tool.setuptools.packages.find]
-where = ["src"]
-include = ["*"]
-exclude = ["tests*"]
+[tool.poetry.group.test.dependencies]
+pytest = "^8.3"
+pytest-cov = "^6.1"
 
-[tool.setuptools]
-package-dir = {"" = "src"}
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
 
+[tool.poetry.scripts]
+my-cli = "{{ cookiecutter.module_name }}.__main__:main"
+
+# Configure pytest
 [tool.pytest.ini_options]
 addopts = "--cov=src"
-testpaths = [
-    "tests",
-]
+testpaths = ["tests"]
 
+# Configure mypy
 [tool.mypy]
 mypy_path = "src"
 check_untyped_defs = true
