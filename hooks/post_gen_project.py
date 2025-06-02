@@ -11,6 +11,7 @@ Colorized output is provided using the Colorama library for better readability a
 import os
 import subprocess
 import sys
+import shutil
 from colorama import Fore, Style, just_fix_windows_console
 
 # Initialize Colorama for Windows compatibility
@@ -27,78 +28,48 @@ INITIALIZE_GIT_REPOSITORY = "{{ cookiecutter.initialize_git_repository }}"
 # PYTHON_VERSION = "{{ cookiecutter.python_version }}"
 
 # --- Virtual Environment Setup ---
-def create_virtualenv():
-    """Sets up a virtual environment in the project."""
+def install_poetry_env():
+    """Install dependencies using Poetry and all groups."""
+    print(f"{MESSAGE_COLOR}Installing dependencies with Poetry...{RESET_ALL}")
     try:
-        print(f"{MESSAGE_COLOR}Setting up a virtual environment...{RESET_ALL}")
-        # Create virtual environment using the specified Python version
-        subprocess.check_call([sys.executable, '-m', 'venv', '.venv'])
-        print(f"{MESSAGE_COLOR}Virtual environment created successfully in '.venv' directory.{RESET_ALL}")
+        subprocess.check_call(["poetry", "install", "--with", "dev,test,notebook,data-science,viz"])
+        print(f"{MESSAGE_COLOR}Poetry environment set up successfully.{RESET_ALL}")
     except subprocess.CalledProcessError as e:
-        print(f"{ERROR_COLOR}Error during virtual environment setup: {e}{RESET_ALL}")
+        print(f"{ERROR_COLOR}Error installing dependencies: {e}{RESET_ALL}")
         sys.exit(1)
 
-def install_requirements():
-    """Installs the required packages in the virtual environment."""
-    try:
-        # Determine the correct path for pip based on the OS
-        if os.name == 'nt':  # Windows
-            pip_executable = os.path.join('.venv', 'Scripts', 'pip')
-        else:  # Unix-based systems (Linux/MacOS)
-            pip_executable = os.path.join('.venv', 'bin', 'pip')
-
-        # Check if 'requirements.txt' exists before trying to install
-        if os.path.exists('requirements.txt'):
-            print(f"{MESSAGE_COLOR}Installing dependencies from 'requirements.txt'...{RESET_ALL}")
-            subprocess.check_call([pip_executable, 'install', '-r', 'requirements.txt'])
-            print(f"{MESSAGE_COLOR}Dependencies installed successfully.{RESET_ALL}")
+def copy_env_file():
+    """Copy .env.example to .env if it doesn't already exist."""
+    src = ".env.example"
+    dst = ".env"
+    if os.path.exists(src):
+        if not os.path.exists(dst):
+            shutil.copyfile(src, dst)
+            print(f"{MESSAGE_COLOR}Copied '{src}' to '{dst}'.{RESET_ALL}")
         else:
-            print(f"{MESSAGE_COLOR}No 'requirements.txt' found. Skipping dependency installation.{RESET_ALL}")
-    except subprocess.CalledProcessError as e:
-        print(f"{ERROR_COLOR}Error during requirements installation: {e}{RESET_ALL}")
-        sys.exit(1)
-
-def install_project_in_editable_mode():
-    """Installs the project in editable mode using pip and pyproject.toml."""
-    try:
-        # Determine the correct path for pip based on the OS
-        if os.name == 'nt':  # Windows
-            pip_executable = os.path.join('.venv', 'Scripts', 'pip')
-        else:  # Unix-based systems (Linux/MacOS)
-            pip_executable = os.path.join('.venv', 'bin', 'pip')
-
-        # Check if pyproject.toml exists before installing the project
-        if os.path.exists('pyproject.toml'):
-            print(f"{MESSAGE_COLOR}Installing the project in editable mode with dev dependencies...{RESET_ALL}")
-            subprocess.check_call([pip_executable, 'install', '-e', '.[dev]'])
-            print(f"{MESSAGE_COLOR}Project installed successfully in editable mode.{RESET_ALL}")
-        else:
-            print(f"{MESSAGE_COLOR}No 'pyproject.toml' found. Skipping project installation in editable mode.{RESET_ALL}")
-    except subprocess.CalledProcessError as e:
-        print(f"{ERROR_COLOR}Error during project installation: {e}{RESET_ALL}")
-        sys.exit(1)
+            print(f"{MESSAGE_COLOR}'{dst}' already exists. Skipping copy.{RESET_ALL}")
+    else:
+        print(f"{ERROR_COLOR}No '{src}' found to copy.{RESET_ALL}")
 
 # --- Git Repository Initialization ---
 def run_git_command(command):
-    """Executes a Git command using subprocess and handles errors."""
+    """Execute a Git command and handle errors."""
     try:
         subprocess.check_call(command)
     except subprocess.CalledProcessError as e:
-        print(f"{ERROR_COLOR}ERROR: Git command '{' '.join(command)}' failed with error: {e}{RESET_ALL}")
+        print(f"{ERROR_COLOR}Git command failed: {' '.join(command)}\n{e}{RESET_ALL}")
         sys.exit(1)
 
 def initialize_git():
-    """Initializes a Git repository, adds files, and makes an initial commit."""
-    print(f"{MESSAGE_COLOR}Initializing a git repository...{RESET_ALL}")
-
+    """Initialize a Git repository."""
+    print(f"{MESSAGE_COLOR}Initializing Git repository...{RESET_ALL}")
     git_commands = [
         ['git', 'init'],
-        ['git', 'add', '*'],
-        ['git', 'commit', '-m', 'Initial commit']
+        ['git', 'add', '.'],
+        ['git', 'commit', '-m', 'Initial commit'],
     ]
-
-    for command in git_commands:
-        run_git_command(command)
+    for cmd in git_commands:
+        run_git_command(cmd)
 
 # --- Main Execution Logic ---
 def main():
@@ -106,9 +77,8 @@ def main():
 
     # Handle virtual environment setup
     if INITIALIZE_VIRTUALENV.lower() == "yes":
-        create_virtualenv()
-        install_project_in_editable_mode()
-        install_requirements()
+        install_poetry_env()
+        copy_env_file()
     else:
         print(f"{MESSAGE_COLOR}Skipping virtual environment setup.{RESET_ALL}")
 
