@@ -1,15 +1,14 @@
 {
-    "project_name": "project_name",
-    "project_slug": "{{ cookiecutter.project_name.lower().replace(' ', '_').replace('-', '_') }}",
-    "module_name": "{{ cookiecutter.project_name.lower().replace(' ', '_').replace('-', '_') }}",
-    "author_name": "Your name (or your organization/company/team)",
-    "author_email": "Yout email (or your organization/company/team)",
-    "project_description": "A short description of the project.",
-    "project_url": "https://example.com",
-    "project_version": "0.1.0",
-    "python_version": "3.11",
-    "initialize_virtualenv": ["Yes", "No"],
-    "project_packages": ["All", "Minimal"],
-    "initialize_git_repository": ["Yes", "No"],
-    "license": ["No license file", "MIT", "BSD-3-Clause"]
+  "author_name": "Your Name or Team",
+  "author_email": "you@example.com",
+  "project_name": "Example Project",
+  "project_slug": "project_slug",
+  "module_name": "module_name",
+  "project_description": "A short description of the project.",
+  "project_url": "https://example.com",
+  "project_version": "0.1.0",
+  "python_version": "3.11",
+  "license": ["MIT", "BSD-3-Clause", "No license file"],
+  "initialize_virtualenv": ["yes", "no"],
+  "initialize_git_repository": ["yes", "no"]
 }
