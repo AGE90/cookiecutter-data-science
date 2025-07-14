@@ -1,9 +1,8 @@
 """
-This script handles two optional configurations post-project generation:
-1. Virtual Environment Setup: If the user opts to set up a virtual environment, this script
-   creates it using the Python `venv` module and installs dependencies from `requirements.txt`.
-2. Git Repository Initialization: If the user opts to initialize a Git repository, the script
-   runs a series of Git commands to initialize, add, and commit files.
+This script handles post-project generation tasks:
+1. Poetry Environment Setup: Creates and configures Poetry environment with optional groups
+2. Data Science Tools Setup: Configures DVC, MLflow, Streamlit, and Jupyter if selected
+3. Git Repository Initialization: Initializes Git repository if selected
 
 Colorized output is provided using the Colorama library for better readability across platforms.
 """
@@ -22,36 +21,141 @@ MESSAGE_COLOR = Fore.CYAN
 ERROR_COLOR = Fore.RED
 RESET_ALL = Style.RESET_ALL
 
-# Cookiecutter variables (filled in based on user input)
-INITIALIZE_VIRTUALENV = "{{ cookiecutter.initialize_virtualenv }}"
-INITIALIZE_GIT_REPOSITORY = "{{ cookiecutter.initialize_git_repository }}"
-# PYTHON_VERSION = "{{ cookiecutter.python_version }}"
 
-# --- Virtual Environment Setup ---
-def install_poetry_env():
-    """Install dependencies using Poetry and all groups."""
-    print(f"{MESSAGE_COLOR}Installing dependencies with Poetry...{RESET_ALL}")
+# Cookiecutter variables (filled in based on user input)
+INITIALIZE_POETRY_ENV = "{{ cookiecutter.initialize_poetry_env }}"
+INITIALIZE_GIT_REPOSITORY = "{{ cookiecutter.initialize_git_repository }}"
+USE_DVC = "{{ cookiecutter.use_dvc }}"
+USE_MLFLOW = "{{ cookiecutter.use_mlflow }}"
+USE_STREAMLIT = "{{ cookiecutter.use_streamlit }}"
+
+# Dependency groups from cookiecutter.json
+PROJECT_DEPENDENCIES = "{{ cookiecutter.project_dependencies }}"
+DEV_DEPENDENCIES = "{{ cookiecutter.development_dependencies }}"
+NOTEBOOK_DEPENDENCIES = "{{ cookiecutter.notebook_dependencies }}"
+DATA_SCIENCE_DEPENDENCIES = "{{ cookiecutter.data_science_dependencies }}"
+VIZ_DEPENDENCIES = "{{ cookiecutter.vizualization_dependencies }}"
+TEST_DEPENDENCIES = "{{ cookiecutter.testing_dependencies }}"
+
+# --- Poetry Environment Setup ---
+
+
+def configure_poetry():
+    """Configure Poetry settings."""
+    print(f"{MESSAGE_COLOR}Configuring Poetry...{RESET_ALL}")
     try:
-        subprocess.check_call(["poetry", "install", "--with", "dev,test,notebook,data-science,viz"])
-        print(f"{MESSAGE_COLOR}Poetry environment set up successfully.{RESET_ALL}")
+        # Configure Poetry to create virtualenv in project directory
+        subprocess.check_call(
+            ["poetry", "config", "virtualenvs.in-project", "true"])
+        print(f"{MESSAGE_COLOR}Poetry configured successfully.{RESET_ALL}")
     except subprocess.CalledProcessError as e:
-        print(f"{ERROR_COLOR}Error installing dependencies: {e}{RESET_ALL}")
+        print(f"{ERROR_COLOR}Error configuring Poetry: {e}{RESET_ALL}")
         sys.exit(1)
 
+
+def add_poetry_dependencies():
+    """Add user-specified dependencies to poetry for each group."""
+    # Always include these in dev dependencies
+    always_dev = {"mypy", "ruff", "black", "pre-commit"}
+    # Handle dev dependencies
+    dev_pkgs = set([pkg.strip()
+                   for pkg in DEV_DEPENDENCIES.strip().split(",") if pkg.strip()])
+    dev_pkgs.update(always_dev)
+    dev_pkgs = sorted(dev_pkgs)
+    if dev_pkgs:
+        print(
+            f"{MESSAGE_COLOR}Adding dev dependencies: {', '.join(dev_pkgs)} --group dev{RESET_ALL}")
+        try:
+            subprocess.check_call(
+                ["poetry", "add", "--group", "dev"] + dev_pkgs)
+        except subprocess.CalledProcessError as e:
+            print(f"{ERROR_COLOR}Error adding dev dependencies: {e}{RESET_ALL}")
+            sys.exit(1)
+
+    # Handle other groups
+    dep_groups = [
+        (PROJECT_DEPENDENCIES, []),
+        (NOTEBOOK_DEPENDENCIES, ["--group", "notebook"]),
+        (DATA_SCIENCE_DEPENDENCIES, ["--group", "data-science"]),
+        (VIZ_DEPENDENCIES, ["--group", "viz"]),
+        (TEST_DEPENDENCIES, ["--group", "test"]),
+    ]
+    for dep_string, group_args in dep_groups:
+        dep_string = dep_string.strip()
+        if dep_string:
+            pkgs = [pkg.strip()
+                    for pkg in dep_string.split(",") if pkg.strip()]
+            if pkgs:
+                print(
+                    f"{MESSAGE_COLOR}Adding dependencies: {', '.join(pkgs)} {' '.join(group_args)}{RESET_ALL}")
+                try:
+                    subprocess.check_call(
+                        ["poetry", "add"] + group_args + pkgs)
+                except subprocess.CalledProcessError as e:
+                    print(f"{ERROR_COLOR}Error adding dependencies: {e}{RESET_ALL}")
+                    sys.exit(1)
+
+
+# --- Environment Setup ---
 def copy_env_file():
-    """Copy .env.example to .env if it doesn't already exist."""
-    src = ".env.example"
-    dst = ".env"
-    if os.path.exists(src):
-        if not os.path.exists(dst):
-            shutil.copyfile(src, dst)
-            print(f"{MESSAGE_COLOR}Copied '{src}' to '{dst}'.{RESET_ALL}")
-        else:
-            print(f"{MESSAGE_COLOR}'{dst}' already exists. Skipping copy.{RESET_ALL}")
+    """Create an .env if it doesn't already exist."""
+    env_file = ".env"
+    if not os.path.exists(env_file):
+        print(f"{MESSAGE_COLOR}Creating .env file...{RESET_ALL}")
+        with open(env_file, "w", encoding="utf-8") as f:
+            f.write("# Add your environment variables here\n")
+        print(f"{MESSAGE_COLOR}.env file created successfully.{RESET_ALL}")
     else:
-        print(f"{ERROR_COLOR}No '{src}' found to copy.{RESET_ALL}")
+        print(f"{MESSAGE_COLOR}.env file already exists, skipping creation.{RESET_ALL}")
+
+
+# # --- Data Science Tools Setup ---
+# def setup_dvc():
+#     """Initialize DVC if selected."""
+#     if USE_DVC.lower() == "yes":
+#         print(f"{MESSAGE_COLOR}Setting up DVC...{RESET_ALL}")
+#         try:
+#             subprocess.check_call(["dvc", "init"])
+#             # Create default .dvc directories
+#             os.makedirs("data/raw", exist_ok=True)
+#             os.makedirs("data/processed", exist_ok=True)
+#             print(f"{MESSAGE_COLOR}DVC initialized successfully.{RESET_ALL}")
+#         except subprocess.CalledProcessError as e:
+#             print(f"{ERROR_COLOR}Error initializing DVC: {e}{RESET_ALL}")
+#             sys.exit(1)
+
+# def setup_mlflow():
+#     """Configure MLflow if selected."""
+#     if USE_MLFLOW.lower() == "yes":
+#         print(f"{MESSAGE_COLOR}Setting up MLflow...{RESET_ALL}")
+#         try:
+#             os.makedirs("mlruns", exist_ok=True)
+#             print(f"{MESSAGE_COLOR}MLflow directory created successfully.{RESET_ALL}")
+#         except Exception as e:
+#             print(f"{ERROR_COLOR}Error setting up MLflow: {e}{RESET_ALL}")
+#             sys.exit(1)
+
+# def setup_streamlit():
+#     """Configure Streamlit if selected."""
+#     if USE_STREAMLIT.lower() == "yes":
+#         print(f"{MESSAGE_COLOR}Setting up Streamlit...{RESET_ALL}")
+#         try:
+#             os.makedirs("streamlit", exist_ok=True)
+#             # Create a basic Streamlit app
+#             with open("streamlit/app.py", "w") as f:
+#                 f.write('''import streamlit as st
+
+# st.title("Data Science Project Dashboard")
+# st.write("Welcome to your new data science project!")
+# ''')
+#             print(f"{MESSAGE_COLOR}Streamlit setup completed successfully.{RESET_ALL}")
+#         except Exception as e:
+#             print(f"{ERROR_COLOR}Error setting up Streamlit: {e}{RESET_ALL}")
+#             sys.exit(1)
 
 # --- Git Repository Initialization ---
+
+
 def run_git_command(command):
     """Execute a Git command and handle errors."""
     try:
@@ -59,6 +163,7 @@ def run_git_command(command):
     except subprocess.CalledProcessError as e:
         print(f"{ERROR_COLOR}Git command failed: {' '.join(command)}\n{e}{RESET_ALL}")
         sys.exit(1)
+
 
 def initialize_git():
     """Initialize a Git repository."""
@@ -72,15 +177,23 @@ def initialize_git():
         run_git_command(cmd)
 
 # --- Main Execution Logic ---
+
+
 def main():
     """Main function to handle post-generation tasks based on user inputs."""
 
     # Handle virtual environment setup
-    if INITIALIZE_VIRTUALENV.lower() == "yes":
-        install_poetry_env()
-        copy_env_file()
+    if INITIALIZE_POETRY_ENV.lower() == "yes":
+        configure_poetry()
+        add_poetry_dependencies()
     else:
         print(f"{MESSAGE_COLOR}Skipping virtual environment setup.{RESET_ALL}")
+
+    # Additional setup tasks
+    copy_env_file()
+    # setup_dvc()
+    # setup_mlflow()
+    # setup_streamlit()
 
     # Handle Git repository initialization
     if INITIALIZE_GIT_REPOSITORY.lower() == "yes":
@@ -89,6 +202,7 @@ def main():
         print(f"{MESSAGE_COLOR}Skipping Git repository initialization.{RESET_ALL}")
 
     print(f"{MESSAGE_COLOR}All post-generation tasks completed!{RESET_ALL}")
+
 
 # Run the main function
 if __name__ == "__main__":

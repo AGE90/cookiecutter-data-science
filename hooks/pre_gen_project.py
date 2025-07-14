@@ -10,68 +10,124 @@ Also normalizes the names and displays the derived values.
 Uses Colorama for cross-platform colored output.
 """
 
-import os
+import keyword
 import re
 import sys
+from pathlib import Path
+from urllib.parse import urlparse
+
 from colorama import Fore, Style, just_fix_windows_console
 
 # --- Initialize Colorama (Windows-safe) ---
 just_fix_windows_console()
 
+# Cookiecutter variables (filled in based on user input)
+PROJECT_NAME = "{{ cookiecutter.project_name }}"
+PROJECT_SLUG = "{{ cookiecutter.project_slug }}"
+MODULE_NAME = "{{ cookiecutter.module_name }}"
+AUTHOR_EMAIL = "{{ cookiecutter.author_email }}"
+PROJECT_URL = "{{ cookiecutter.project_url }}"
+PYTHON_VERSION = "{{ cookiecutter.python_version }}"
+
 # --- Constants ---
 MODULE_REGEX = r'^[_a-zA-Z][_a-zA-Z0-9]*$'
+EMAIL_REGEX = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+PYTHON_VERSION_REGEX = r'^3\.(?:[0-9]|1[0-1])$'
 ERROR_COLOR = Fore.RED
 INFO_COLOR = Fore.CYAN
 RESET_ALL = Style.RESET_ALL
 
 # --- Helpers ---
-def normalize_name(name):
-    """Normalize a name by lowercasing and replacing hyphens/spaces with underscores."""
-    return re.sub(r'[-\s]+', '_', name.strip().lower())
+def validate_module(name: str) -> None:
+    """
+    Validate module name.
 
-def validate_identifier(name, label):
-    """Validate a Python identifier using regex."""
+    Parameters
+    ----------
+    name : str
+        Module name to validate.
+    """
     if not re.match(MODULE_REGEX, name):
-        print(f"{ERROR_COLOR}❌ ERROR: The {label} '{name}' is not a valid Python identifier!{RESET_ALL}")
-        print(f"{INFO_COLOR}⚠ A valid {label} must start with a letter or underscore and contain only letters, numbers, or underscores.{RESET_ALL}")
+        print(f"{ERROR_COLOR} ERROR: The module '{name}' is not a valid Python identifier!{RESET_ALL}")
+        print(f"{INFO_COLOR} A valid module name must start with a letter or underscore and contain only letters, numbers, or underscores.{RESET_ALL}")
         sys.exit(1)
-    print(f"{INFO_COLOR}✅ Valid {label}: {name}{RESET_ALL}")
+    if keyword.iskeyword(name):
+        print(
+            f"{ERROR_COLOR} ERROR: The module name '{name}' is a Python reserved keyword!{RESET_ALL}")
+        sys.exit(1)
+    print(f"{INFO_COLOR} Valid module name: {name}{RESET_ALL}")
 
-def is_placeholder(value, keywords):
-    """Check if a value is a placeholder."""
-    return not value or any(k in value.lower() for k in keywords)
+
+def validate_email(email: str) -> None:
+    """
+    Validate email format.
+
+    Parameters
+    ----------
+    email : str
+        Email address to validate
+    """
+    if not re.match(EMAIL_REGEX, email):
+        print(f"{ERROR_COLOR} ERROR: Invalid email format: {email}{RESET_ALL}")
+        sys.exit(1)
+    print(f"{INFO_COLOR} Valid email: {email}{RESET_ALL}")
+
+
+def validate_url(url: str) -> None:
+    """
+    Validate URL format.
+
+    Parameters
+    ----------
+    url : str
+        URL to validate.
+
+    Raises
+    ------
+    ValueError
+        If the URL format is invalid.
+    """
+    try:
+        result = urlparse(url)
+        if not all([result.scheme, result.netloc]):
+            raise ValueError("Invalid URL format")
+        print(f"{INFO_COLOR} Valid URL: {url}{RESET_ALL}")
+    except ValueError:
+        print(f"{ERROR_COLOR} ERROR: Invalid URL format: {url}{RESET_ALL}")
+        sys.exit(1)
+
+
+def validate_python_version(version: str) -> None:
+    """
+    Validate Python version format.
+
+    Parameters
+    ----------
+    version : str
+        Python version to validate.
+    """
+    if not re.match(PYTHON_VERSION_REGEX, version):
+        print(f"{ERROR_COLOR} ERROR: Invalid Python version format: {version}{RESET_ALL}")
+        print(f"{INFO_COLOR} Version must be in format '3.x' where x is 0-11{RESET_ALL}")
+        sys.exit(1)
+    print(f"{INFO_COLOR} Valid Python version: {version}{RESET_ALL}")
+
 
 # --- Main Execution ---
 def main():
     """
-    Validate Cookiecutter inputs and normalize values.
+    Validate Cookiecutter inputs.
     """
-    # Get Cookiecutter values (they are string-rendered here)
-    raw_project_name = "{{ cookiecutter.project_name }}"
-    raw_slug = "{{ cookiecutter.project_slug }}"
-    raw_module_name = "{{ cookiecutter.module_name }}"
-    
-    # Check for placeholder-like input
-    if is_placeholder(raw_slug, ["project_slug", "slug"]):
-        print(f"{ERROR_COLOR}❌ ERROR: Please specify a valid project slug.{RESET_ALL}")
-        sys.exit(1)
-    if is_placeholder(raw_module_name, ["module_name", "module"]):
-        print(f"{ERROR_COLOR}❌ ERROR: Please specify a valid module name.{RESET_ALL}")
-        sys.exit(1)
-
-    # Normalize values
-    slug = normalize_name(raw_slug)
-    module_name = normalize_name(raw_module_name)
-    
-    print(f"{INFO_COLOR}🔧 Normalized slug: {slug}{RESET_ALL}")
-    print(f"{INFO_COLOR}🔧 Normalized module name: {module_name}{RESET_ALL}")
-
-    # Validate both
-    validate_identifier(slug, "project slug")
-    validate_identifier(module_name, "module name")
+    # Validate all fields
+    validate_module(MODULE_NAME)
+    validate_email(AUTHOR_EMAIL)
+    validate_url(PROJECT_URL)
+    validate_python_version(PYTHON_VERSION)
 
     # Success message
-    print(f"{INFO_COLOR}📁 Project {raw_project_name} will be created in: {os.getcwd()}{RESET_ALL}")
+    full_path = Path.cwd() / PROJECT_SLUG
+    print(f"{INFO_COLOR} Project '{PROJECT_NAME}' will be created in: {full_path}{RESET_ALL}")
+
 
 if __name__ == "__main__":
     main()

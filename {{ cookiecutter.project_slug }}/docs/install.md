@@ -9,198 +9,196 @@ Welcome to the **{{ cookiecutter.project_name }}** installation guide! This guid
 Make sure you have the following installed before proceeding:
 
 - **Python**: Version >= 3.9
+- **Poetry**: Latest version (for dependency management)
+
+To install Poetry, follow the [official installation guide](https://python-poetry.org/docs/#installation).
 
 ---
 
-## 1. Create and Activate a Virtual Environment
+## 1. Clone and Set Up the Project
 
-Navigate to your project directory and create a virtual environment:
-
-```bash
-python -m venv .venv
-```
-
-### Activate the virtual environment
-
-#### On Unix/MacOS
+First, clone the repository and navigate to the project directory:
 
 ```bash
-source .venv/bin/activate
-```
-
-#### On Windows
-
-```bash
-. .venv/Scripts/activate
-```
-
-Once activated, your shell prompt should change to indicate that you're working inside the virtual environment.
-
----
-
-## 2. Install Required Packages
-
-First, upgrade `pip` to the latest version:
-
-```bash
-python -m pip install --upgrade pip
-```
-
-Then, install the required packages from `requirements.txt`:
-
-```bash
-pip install -r requirements.txt --no-cache-dir
-```
-
-### Install Jupyter and JupyterLab (Optional)
-
-If you plan to use Jupyter or JupyterLab, install them with the following commands:
-
-```bash
-pip install jupyter
-pip install jupyterlab
-```
-
-Your project dependencies are now installed within the virtual environment.
-
-**Note:** The following sections assume that your virtual environment is active.
-
----
-
-## 3. Set Up Project’s Module
-
-To move beyond notebook prototyping, reusable code should reside in the `{{ cookiecutter.module_name }}/` package. To work with this package in development mode, you can install it in **editable** mode. This allows you to make changes to the module and use them without reinstalling the package.
-
-Run the following command in your project root:
-
-```bash
-pip install -e .[dev]
-```
-
-### Use the Module Inside Jupyter Notebooks
-
-To ensure that your changes in the `{{ cookiecutter.module_name }}` module are automatically reloaded in Jupyter notebooks, add `%autoreload` at the top of your notebook:
-
-```python
-%load_ext autoreload
-%autoreload 2
-```
-
-### Example of Module Usage
-
-```python
-from {{ cookiecutter.module_name }}.utils.paths import data_dir
-data_dir()
+git clone <repository-url>
+cd {{ cookiecutter.project_slug }}
 ```
 
 ---
 
-## 4. Set Up Git Diff for Jupyter Notebooks
+## 2. Install Dependencies with Poetry
 
-To efficiently manage and track changes in Jupyter notebooks, we recommend using **[nbdime](https://nbdime.readthedocs.io/en/stable/index.html)** for diffing and merging.
-
-### Install nbdime
+Poetry will automatically create a virtual environment and install all dependencies. Run the following command in your project root:
 
 ```bash
-pip install nbdime
+poetry install
 ```
 
-### Configure Git for nbdime
+This will install all dependencies defined in `pyproject.toml`, including:
+
+- Core dependencies
+- Development tools (black, ruff, mypy, etc.)
+- Data science packages (pandas, scikit-learn, etc.)
+- Visualization tools (matplotlib, seaborn, etc.)
+- Testing frameworks (pytest, etc.)
+
+### Optional: Install Specific Groups
+
+You can install specific dependency groups if needed:
 
 ```bash
-nbdime config-git --enable
-```
+# Install only development dependencies
+poetry install --with dev
 
-### Enable nbdime extensions
+# Install data science and visualization dependencies
+poetry install --with data-science,viz
 
-To enable the Jupyter extensions for diffing notebooks:
-
-```bash
-nbdime extensions --enable --sys-prefix
-```
-
-Alternatively, if you need more granular control, you can manually enable the extensions with:
-
-```bash
-jupyter serverextension enable --py nbdime --sys-prefix
-jupyter nbextension install --py nbdime --sys-prefix
-jupyter nbextension enable --py nbdime --sys-prefix
-jupyter labextension install nbdime-jupyterlab
-```
-
-If needed, rebuild the JupyterLab extensions with:
-
-```bash
-jupyter lab build
+# Install all groups
+poetry install --with dev,test,notebook,data-science,viz
 ```
 
 ---
 
-## 5. Set Up Plotly for JupyterLab
+## 3. Activate the Poetry Environment
 
-Plotly requires some additional steps to work correctly with JupyterLab.
-
-### Install Required Extensions
-
-Run the following commands to install the necessary JupyterLab extensions for Plotly:
+To activate the Poetry virtual environment:
 
 ```bash
-jupyter labextension install @jupyter-widgets/jupyterlab-manager@0.36 --no-build
-jupyter labextension install plotlywidget@0.2.1 --no-build
-jupyter labextension install @jupyterlab/plotly-extension@0.16 --no-build
-jupyter lab build
+poetry env activate
 ```
 
-**Note:** There can be version conflicts between JupyterLab and Plotly extensions, so always check the [latest Plotly documentation](https://github.com/plotly/plotly.py#installation-of-plotlypy-version-3) to ensure compatibility.
+Or run commands directly using:
+
+```bash
+poetry run <command>
+```
+
+---
+
+## 4. Set Up Development Tools
+
+### Pre-commit Hooks
+
+Install pre-commit hooks to ensure code quality:
+
+```bash
+poetry run pre-commit install
+```
+
+### Jupyter and JupyterLab
+
+If you plan to use Jupyter notebooks, install the notebook group:
+
+```bash
+poetry install --with notebook
+```
+
+To launch JupyterLab:
+
+```bash
+poetry run jupyter lab
+```
+
+### Set Up Plotly for JupyterLab
+
+Install the required JupyterLab extensions for Plotly:
+
+```bash
+poetry run jupyter labextension install @jupyter-widgets/jupyterlab-manager@0.36 --no-build
+poetry run jupyter labextension install plotlywidget@0.2.1 --no-build
+poetry run jupyter labextension install @jupyterlab/plotly-extension@0.16 --no-build
+poetry run jupyter lab build
+```
+
+---
+
+## 5. Set Up Data Science Tools
+
+### DVC (Data Version Control)
+
+If you selected DVC during project creation:
+
+```bash
+poetry run dvc init
+```
+
+### MLflow
+
+If you selected MLflow during project creation, the tracking server will be available at `http://localhost:5000`:
+
+```bash
+poetry run mlflow ui
+```
+
+### Streamlit
+
+If you selected Streamlit during project creation, you can run the app with:
+
+```bash
+poetry run streamlit run streamlit/app.py
+```
 
 ---
 
 ## 6. Managing Project Tasks with Invoke
 
-We use **[Invoke](http://www.pyinvoke.org/)** as a task runner for common project management tasks. You can view available tasks and manage them from a single entry point.
+We use **[Invoke](http://www.pyinvoke.org/)** as a task runner for common project management tasks.
 
 ### List Available Tasks
 
 ```bash
-invoke -l
-```
-
-For example, you might see:
-
-```text
-Available tasks:
-
-  lab     Launch Jupyter lab
+poetry run invoke -l
 ```
 
 ### Get Help on a Specific Task
 
 ```bash
-invoke --help lab
-```
-
-The output might look like:
-
-```text
-Usage: inv[oke] [--core-opts] lab [--options] [other tasks here ...]
-
-Docstring:
-  Launch Jupyter Lab.
-
-Options:
-  -i STRING, --ip=STRING   IP to listen on, defaults to *
-  -p, --port               Port to listen on, defaults to 8888
+poetry run invoke --help <task-name>
 ```
 
 ### Adding Custom Tasks
 
-To add your own tasks, edit the `tasks.py` file. This file contains the definition of each task. You can create custom tasks based on your project's requirements.
+To add your own tasks, edit the `tasks.py` file in your project root.
 
 ---
 
-### Final Notes
+## 7. Testing
 
-- Ensure that your virtual environment is activated when running any project-related commands.
-- Explore `tasks.py` to customize and extend the task automation for your needs.
-  
+Run the test suite using pytest:
+
+```bash
+poetry run pytest
+```
+
+For coverage reports:
+
+```bash
+poetry run pytest --cov=src
+```
+
+---
+
+## 8. Documentation
+
+Build the documentation:
+
+```bash
+poetry run mkdocs build
+```
+
+Serve the documentation locally:
+
+```bash
+poetry run mkdocs serve
+```
+
+---
+
+## Final Notes
+
+- Always use `poetry run` to execute commands within the project's virtual environment
+- Use `poetry add <package>` to add new dependencies
+- Use `poetry update` to update dependencies
+- Check `pyproject.toml` for all available dependency groups and their purposes
+
 You're now all set to start developing with **{{ cookiecutter.project_name }}**!

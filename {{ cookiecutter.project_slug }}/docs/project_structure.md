@@ -1,59 +1,158 @@
-# Project structure
+# Project Structure
 
-.
-├── LICENSE
-├── README.md              <- The top-level README for developers using this project.
-├── CHANGELOG.md           <- A changelog to track project updates and versions.
-├── pyproject.toml         <- Project configuration file (replaces setup.py and requirements.txt).
-├── .gitignore             <- Specifies intentionally untracked files to ignore.
-├── Makefile               <- Automate common tasks like testing, running, or setting up.
-├── .env                   <- Environment variables (ignored by git).
-├── .pre-commit-config.yaml <- Pre-commit hooks for linting/formatting.
-├── app                    <- Main application code (if applicable).
-│   └── main.py            <- Entry point for the application.
-├── config                 <- Configuration files for the project.
-│   ├── dev.yml            <- Development environment configuration.
-│   └── prod.yml           <- Production environment configuration.
-├── data
-│   ├── external           <- Data from third party sources.
-│   ├── interim            <- Intermediate data that has been transformed.
-│   ├── processed          <- The final, canonical data sets for modeling.
-│   ├── raw                <- The original, immutable data dump.
-│   └── .dvc/              <- DVC meta-files for data tracking.
-├── docs                   <- Project documentation.
-│   ├── index.md           <- Main index or README for the documentation.
-│   ├── project_structure.md    <- Project structure tree.
-│   ├── install.md         <- Detailed instructions to set up this project.
-│   ├── api.md             <- API documentation.
-│   ├── user_guide.md      <- User guide for the project.
-│   └── developer_guide.md <- Guide for developers contributing to the project.
-├── logs                   <- Log files.
-├── models                 <- Trained and serialized models, model predictions, or model summaries.
-├── notebooks              <- Jupyter notebooks. Naming convention is a number (for ordering),
-│                             the creator's initials, and a short `-` delimited description, e.g.
-│                             `01-AGE90-initial_data_exploration`.
-├── references             <- Data dictionaries, manuals, and all other explanatory materials.
-├── reports                <- Generated analysis as HTML, PDF, LaTeX, etc.
-│   └── figures            <- Generated graphics and figures to be used in reporting.
-├── scripts                <- Utility scripts for project management, data processing, etc.
-│   ├── data_download.sh   <- Script to download raw data.
-│   └── setup_env.sh       <- Script to set up the development environment.
-├── src
-│   └── {{ cookiecutter.module_name }}  <- Source code for use in this project.
-│       ├── __init__.py    <- Makes {{ cookiecutter.module_name }} a Python module.
-│       ├── data           <- Scripts to download or generate data.
-│       │   └── make_dataset.py
-│       ├── features       <- Scripts to turn raw data into features for modeling.
-│       │   └── build_features.py
-│       ├── models         <- Scripts to train models and then use trained models to make predictions.
-│       │   ├── predict_model.py
-│       │   └── train_model.py
-│       ├── utils          <- Scripts to help with common tasks.
-│       │   └── paths.py   <- Helper functions for relative file referencing across project.
-│       └── visualization  <- Scripts to create exploratory and results oriented visualizations.
-│           └── visualize.py
-└── tests                  <- Test files should mirror the structure of `src`.
-    ├── __init__.py
-    ├── conftest.py        <- Shared pytest fixtures.
-    ├── e2e/               <- End-to-end or integration tests.
-    └── unit/              <- Unit tests, mirroring src structure.
+This document provides a detailed explanation of the project's directory structure and the purpose of each component.
+
+## Directory Structure
+
+```
+{{ cookiecutter.project_slug }}/
+├── data/               # Data directory
+│   ├── raw/           # Raw, immutable data
+│   └── processed/     # Cleaned and processed data
+├── docs/              # Documentation
+│   ├── api.md         # API documentation
+│   ├── developer_guide.md  # Development guidelines
+│   ├── index.md       # Main documentation page
+│   ├── install.md     # Installation guide
+│   ├── project_structure.md  # This file
+│   └── user_guide.md  # User guide
+├── notebooks/         # Jupyter notebooks
+│   └── example.ipynb  # Example notebook
+├── reports/           # Generated reports
+│   ├── figures/       # Generated figures
+│   └── tables/        # Generated tables
+├── src/               # Source code
+│   └── {{ cookiecutter.module_name }}/
+│       ├── data/      # Data loading utilities
+│       │   └── data_loader.py
+│       ├── features/  # Feature engineering
+│       │   └── feature_engineering.py
+│       ├── models/    # Model training and evaluation
+│       │   └── model_utils.py
+│       ├── visualization/  # Visualization utilities
+│       │   └── plotting.py
+│       ├── __init__.py
+│       └── __main__.py
+├── tests/             # Test files
+│   ├── conftest.py    # pytest configuration
+│   └── test_*.py      # Test modules
+├── .gitignore         # Git ignore file
+├── .pre-commit-config.yaml  # Pre-commit hooks
+├── LICENSE            # License file
+├── Makefile          # Make commands
+├── README.md         # Project overview
+├── pyproject.toml    # Project configuration
+└── tasks.py          # Invoke tasks
+```
+
+## Key Components
+
+### Data Directory (`data/`)
+
+- `raw/`: Contains the original, immutable data
+  - Never modify files in this directory
+  - Store data in its original format
+  - Use DVC for version control if enabled
+
+- `processed/`: Contains the cleaned and processed data
+  - Intermediate data files
+  - Feature sets
+  - Processed datasets ready for modeling
+
+### Documentation (`docs/`)
+
+- `api.md`: API documentation for the project's modules
+- `developer_guide.md`: Guidelines for developers
+- `index.md`: Main documentation page
+- `install.md`: Installation instructions
+- `project_structure.md`: This file
+- `user_guide.md`: User documentation
+
+### Notebooks (`notebooks/`)
+
+- Jupyter notebooks for exploration and analysis
+- Example notebooks showing project usage
+- Documentation of data analysis workflows
+
+### Reports (`reports/`)
+
+- `figures/`: Generated visualizations
+- `tables/`: Generated tables and statistics
+- Final outputs for presentations and documentation
+
+### Source Code (`src/`)
+
+#### Data Module (`data/`)
+
+- `data_loader.py`: Utilities for loading data
+  - CSV, Excel, Parquet file loading
+  - Data validation
+  - Data type conversion
+
+#### Features Module (`features/`)
+
+- `feature_engineering.py`: Feature creation and transformation
+  - Scaling and normalization
+  - Categorical encoding
+  - Time feature extraction
+  - Feature interactions
+
+#### Models Module (`models/`)
+
+- `model_utils.py`: Model training and evaluation
+  - Train/test splitting
+  - Cross-validation
+  - Model evaluation metrics
+  - MLflow integration
+  - Model persistence
+
+#### Visualization Module (`visualization/`)
+
+- `plotting.py`: Visualization utilities
+  - Distribution plots
+  - Correlation matrices
+  - Time series plots
+  - Box plots
+  - Scatter matrices
+
+### Tests (`tests/`)
+
+- `conftest.py`: pytest configuration and fixtures
+- Test modules matching the source code structure
+- Unit tests for all major functionality
+- Integration tests for key workflows
+
+### Configuration Files
+
+- `.gitignore`: Specifies files to ignore in Git
+- `.pre-commit-config.yaml`: Pre-commit hooks configuration
+- `pyproject.toml`: Project configuration and dependencies
+- `Makefile`: Common development commands
+- `tasks.py`: Invoke tasks for project management
+
+## Best Practices
+
+1. **Data Management**
+   - Keep raw data immutable
+   - Use DVC for data versioning
+   - Document data processing steps
+
+2. **Code Organization**
+   - Follow the established directory structure
+   - Keep related code together
+   - Use appropriate file naming
+
+3. **Documentation**
+   - Keep documentation up to date
+   - Document all public APIs
+   - Include examples in docstrings
+
+4. **Testing**
+   - Write tests for all new functionality
+   - Maintain good test coverage
+   - Use appropriate test fixtures
+
+5. **Version Control**
+   - Use meaningful commit messages
+   - Follow Git flow branching strategy
+   - Keep commits focused and atomic
