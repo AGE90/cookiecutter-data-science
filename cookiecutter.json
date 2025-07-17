@@ -16,8 +16,7 @@
   "data_science_dependencies": "openpyxl, scipy, statsmodels, scikit-learn, joblib",
   "vizualization_dependencies": "seaborn",
   "testing_dependencies": "pytest, pytest-cov, pytest-mock",
-  "use_dvc": ["yes", "no"],
   "use_mlflow": ["yes", "no"],
-  "use_streamlit": ["yes", "no"],
+  "use_dvc": ["yes", "no"],
   "initialize_git_repository": ["yes", "no"]
 }
