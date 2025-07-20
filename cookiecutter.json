@@ -14,7 +14,7 @@
   "development_dependencies": "mypy, ruff, black, pre-commit",
   "notebook_dependencies": "ipykernel",
   "data_science_dependencies": "openpyxl, scipy, statsmodels, scikit-learn, joblib",
-  "vizualization_dependencies": "seaborn",
+  "vizualization_dependencies": "seaborn, missingno",
   "testing_dependencies": "pytest, pytest-cov, pytest-mock",
   "use_mlflow": ["yes", "no"],
   "use_dvc": ["yes", "no"],
