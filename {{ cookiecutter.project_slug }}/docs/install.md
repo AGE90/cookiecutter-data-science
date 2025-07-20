@@ -53,7 +53,7 @@ poetry install --with dev
 # Install data science and visualization dependencies
 poetry install --with data-science,viz
 
-# Install all groups
+# Install all groups same as 'poetry install'
 poetry install --with dev,test,notebook,data-science,viz
 ```
 
@@ -77,15 +77,17 @@ poetry run <command>
 
 ## 4. Set Up Development Tools
 
-### Pre-commit Hooks
+### Pre-commit Hooks (Optional)
 
-Install pre-commit hooks to ensure code quality:
+Install pre-commit hooks:
 
 ```bash
 poetry run pre-commit install
 ```
 
-### Jupyter and JupyterLab
+This activates pre-commit hooks defined in .pre-commit-config.yaml for your project, ensuring code quality checks run on every commit.
+
+### Jupyter and JupyterLab (Optional)
 
 If you plan to use Jupyter notebooks, install the notebook group:
 
@@ -99,7 +101,7 @@ To launch JupyterLab:
 poetry run jupyter lab
 ```
 
-### Set Up Plotly for JupyterLab
+### Set Up Plotly for JupyterLab (Optional)
 
 Install the required JupyterLab extensions for Plotly:
 
@@ -112,9 +114,9 @@ poetry run jupyter lab build
 
 ---
 
-## 5. Set Up Data Science Tools
+## 5. Set Up Data Science Tools (Optional)
 
-### DVC (Data Version Control)
+### Data Version Control (DVC)
 
 If you selected DVC during project creation:
 
@@ -128,14 +130,6 @@ If you selected MLflow during project creation, the tracking server will be avai
 
 ```bash
 poetry run mlflow ui
-```
-
-### Streamlit
-
-If you selected Streamlit during project creation, you can run the app with:
-
-```bash
-poetry run streamlit run streamlit/app.py
 ```
 
 ---

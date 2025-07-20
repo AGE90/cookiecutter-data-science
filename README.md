@@ -73,7 +73,6 @@ This template provides a well-structured project layout with the following direc
 │   ├── processed          <- The final, canonical data sets for modeling.
 │   └── raw                <- The original, immutable data dump.
 ├── docs                   <- Project documentation.
-│   ├── index.md           <- Main index or README for the documentation.
 │   ├── project_structure.md    <- Project structure tree.
 │   ├── install.md         <- Detailed instructions to set up this project.
 │   ├── api.md             <- API documentation.
@@ -141,7 +140,7 @@ The option `author_name` is used as the author's name in the `pyproject.toml` fi
 
 ### Author Email
 
-The option `author_email` is used as the author's email in the `pyproject.toml` file. It should be a valid email address. For example, "john.doe@example.com".
+The option `author_email` is used as the author's email in the `pyproject.toml` file. It should be a valid email address. For example, "<john.doe@example.com>".
 
 ### Project Description
 
@@ -149,7 +148,7 @@ The option `project_description` is used as the project description in the `pypr
 
 ### Project URL
 
-The option `project_url` is used as the project URL in the `pyproject.toml` file. It should be the URL of the project's repository or website. For example, "https://github.com/johndoe/data-science-project."
+The option `project_url` is used as the project URL in the `pyproject.toml` file. It should be the URL of the project's repository or website. For example, "<https://github.com/johndoe/data-science-project>".
 
 ### Project Version
 
@@ -162,6 +161,7 @@ The option `python_version` is used as the minimum Python version required for t
 ### License Selection
 
 The option `license_selection` is used to select the license for your project. It should be one of the following options:
+
 - `MIT`: The MIT License.
 - `BSD-3-Clause`: The BSD 3-Clause License.
 - No licence file: If you do not want to include a license file, select "No licence file".
