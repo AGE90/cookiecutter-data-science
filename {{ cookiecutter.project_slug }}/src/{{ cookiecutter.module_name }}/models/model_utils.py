@@ -1,22 +1,26 @@
 """
-Model training and evaluation utilities for the project.
+Model training and evaluation utilities.
 """
 
-import numpy as np
-import pandas as pd
-from sklearn.model_selection import train_test_split, cross_val_score
-from sklearn.metrics import (
-    accuracy_score,
-    precision_score,
-    recall_score,
-    f1_score,
-    mean_squared_error,
-    r2_score
-)
-from typing import Any, Dict, List, Optional, Tuple, Union
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple, Union, Literal
+
 import mlflow
 import mlflow.sklearn
-from pathlib import Path
+import numpy as np
+import pandas as pd
+from sklearn.metrics import (
+    accuracy_score,
+    f1_score,
+    mean_squared_error,
+    precision_score,
+    r2_score,
+    recall_score
+)
+from sklearn.model_selection import cross_val_score, train_test_split
+import joblib
+import pickle
+
 
 def train_test_split_data(
     X: pd.DataFrame,
@@ -26,37 +30,58 @@ def train_test_split_data(
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Split data into training and testing sets.
-    
-    Args:
-        X: Features
-        y: Target variable
-        test_size: Proportion of data to use for testing
-        random_state: Random seed for reproducibility
-    
-    Returns:
-        tuple: (X_train, X_test, y_train, y_test)
+
+    Parameters
+    ----------
+    X : pandas.DataFrame
+        Features.
+    y : pandas.Series or numpy.ndarray
+        Target variable.
+    test_size : float, optional
+        Proportion of data to use for testing (default is 0.2).
+    random_state : int, optional
+        Random seed for reproducibility (default is 42).
+
+    Returns
+    -------
+    X_train : numpy.ndarray
+        Training features.
+    X_test : numpy.ndarray
+        Testing features.
+    y_train : numpy.ndarray
+        Training target.
+    y_test : numpy.ndarray
+        Testing target.
     """
-    return train_test_split(
+    X_train, X_test, y_train, y_test = train_test_split(
         X, y,
         test_size=test_size,
         random_state=random_state
     )
+    return X_train, X_test, y_train, y_test
+
 
 def evaluate_classification(
     y_true: Union[pd.Series, np.ndarray],
     y_pred: Union[pd.Series, np.ndarray],
-    average: str = 'weighted'
-) -> Dict[str, float]:
+    average: Literal['micro', 'macro', 'samples', 'weighted', 'binary'] | None = "binary"
+) -> Dict[str, Any]:
     """
     Evaluate classification model performance.
-    
-    Args:
-        y_true: True labels
-        y_pred: Predicted labels
-        average: Averaging strategy for multi-class metrics
-    
-    Returns:
-        dict: Dictionary of metric names and values
+
+    Parameters
+    ----------
+    y_true : pandas.Series or numpy.ndarray
+        True labels.
+    y_pred : pandas.Series or numpy.ndarray
+        Predicted labels.
+    average : str, optional
+        Averaging strategy for multi-class metrics (default is 'weighted').
+
+    Returns
+    -------
+    metrics : dict of str to float
+        Dictionary of metric names and values: accuracy, precision, recall, f1.
     """
     return {
         'accuracy': accuracy_score(y_true, y_pred),
@@ -65,19 +90,25 @@ def evaluate_classification(
         'f1': f1_score(y_true, y_pred, average=average)
     }
 
+
 def evaluate_regression(
     y_true: Union[pd.Series, np.ndarray],
     y_pred: Union[pd.Series, np.ndarray]
 ) -> Dict[str, float]:
     """
     Evaluate regression model performance.
-    
-    Args:
-        y_true: True values
-        y_pred: Predicted values
-    
-    Returns:
-        dict: Dictionary of metric names and values
+
+    Parameters
+    ----------
+    y_true : pandas.Series or numpy.ndarray
+        True values.
+    y_pred : pandas.Series or numpy.ndarray
+        Predicted values.
+
+    Returns
+    -------
+    metrics : dict of str to float
+        Dictionary of metric names and values: mse, rmse, r2.
     """
     return {
         'mse': mean_squared_error(y_true, y_pred),
@@ -85,32 +116,42 @@ def evaluate_regression(
         'r2': r2_score(y_true, y_pred)
     }
 
+
 def cross_validate_model(
     model: Any,
     X: pd.DataFrame,
     y: Union[pd.Series, np.ndarray],
     cv: int = 5,
     scoring: str = 'accuracy'
-) -> Dict[str, float]:
+) -> Dict[str, Any]:
     """
     Perform cross-validation on a model.
-    
-    Args:
-        model: Model to evaluate
-        X: Features
-        y: Target variable
-        cv: Number of cross-validation folds
-        scoring: Scoring metric
-    
-    Returns:
-        dict: Dictionary of cross-validation results
+
+    Parameters
+    ----------
+    model : object
+        Model to evaluate.
+    X : pandas.DataFrame
+        Features.
+    y : pandas.Series or numpy.ndarray
+        Target variable.
+    cv : int, optional
+        Number of cross-validation folds (default is 5).
+    scoring : str, optional
+        Scoring metric (default is 'accuracy').
+
+    Returns
+    -------
+    results : dict of str to float
+        Dictionary of cross-validation results: mean_score, std_score, scores.
     """
     scores = cross_val_score(model, X, y, cv=cv, scoring=scoring)
     return {
         'mean_score': scores.mean(),
         'std_score': scores.std(),
-        'scores': scores
+        'scores': scores,
     }
+
 
 def log_mlflow_experiment(
     model: Any,
@@ -122,78 +163,92 @@ def log_mlflow_experiment(
 ) -> None:
     """
     Log model training results to MLflow.
-    
-    Args:
-        model: Trained model
-        params: Model parameters
-        metrics: Evaluation metrics
-        experiment_name: Name of the MLflow experiment
-        run_name: Optional name for this run
-        model_name: Optional name for the model
+
+    Parameters
+    ----------
+    model : object
+        Trained model.
+    params : dict
+        Model parameters.
+    metrics : dict
+        Evaluation metrics.
+    experiment_name : str
+        Name of the MLflow experiment.
+    run_name : str, optional
+        Optional name for this run.
+    model_name : str, optional
+        Optional name for the model.
     """
     mlflow.set_experiment(experiment_name)
-    
+
     with mlflow.start_run(run_name=run_name):
         # Log parameters
         mlflow.log_params(params)
-        
+
         # Log metrics
         mlflow.log_metrics(metrics)
-        
+
         # Log model
         if model_name:
             mlflow.sklearn.log_model(model, model_name)
         else:
             mlflow.sklearn.log_model(model, "model")
 
+
 def save_model(
     model: Any,
     filepath: Union[str, Path],
-    format: str = 'joblib'
+    engine: str = 'joblib'
 ) -> None:
     """
     Save a trained model to disk.
-    
-    Args:
-        model: Trained model
-        filepath: Path to save the model
-        format: Format to save the model in ('joblib' or 'pickle')
+
+    Parameters
+    ----------
+    model : object
+        Trained model.
+    filepath : str or pathlib.Path
+        Path to save the model.
+    engine : str, optional
+        Engine to save the model in ('joblib' or 'pickle'). Default is 'joblib'.
     """
     filepath = Path(filepath)
     filepath.parent.mkdir(parents=True, exist_ok=True)
-    
-    if format == 'joblib':
-        import joblib
+
+    if engine == 'joblib':
         joblib.dump(model, filepath)
-    elif format == 'pickle':
-        import pickle
+    elif engine == 'pickle':
         with open(filepath, 'wb') as f:
             pickle.dump(model, f)
     else:
-        raise ValueError(f"Unsupported format: {format}")
+        raise ValueError(f"Unsupported engine: {engine}")
+
 
 def load_model(
     filepath: Union[str, Path],
-    format: str = 'joblib'
+    engine: str = 'joblib'
 ) -> Any:
     """
     Load a trained model from disk.
-    
-    Args:
-        filepath: Path to the saved model
-        format: Format the model was saved in ('joblib' or 'pickle')
-    
-    Returns:
-        The loaded model
+
+    Parameters
+    ----------
+    filepath : str or pathlib.Path
+        Path to the saved model.
+    engine : str, optional
+        Engine the model was saved in ('joblib' or 'pickle'). Default is 'joblib'.
+
+    Returns
+    -------
+    model : object
+        The loaded model.
     """
     filepath = Path(filepath)
-    
-    if format == 'joblib':
-        import joblib
+
+    if engine == 'joblib':
         return joblib.load(filepath)
-    elif format == 'pickle':
-        import pickle
+    if engine == 'pickle':
         with open(filepath, 'rb') as f:
             return pickle.load(f)
     else:
-        raise ValueError(f"Unsupported format: {format}") 
+        raise ValueError(f"Unsupported engine: {engine}")
