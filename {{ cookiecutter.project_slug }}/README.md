@@ -45,7 +45,7 @@ Please read [install.md](docs/install.md) for details on how to set up this proj
 
 ---
 
-## Basic Usage
+## Basic Usage for Data Science Tasks
 
 ### Working in Notebooks
 
@@ -90,6 +90,83 @@ plot_distribution(
     data=results_df,
     save_path=reports_figures_dir('results.png'),
 )
+```
+
+### Local Experiment Tracking
+
+When traicking experiments locally it is recommended to MLflow set up the tracking URI to the `models/` directory to store the artifacts and database files. To achieve this, you can use the following code snippet in your scripts or notebooks:
+
+```python
+import mlflow
+from {{ cookiecutter.module_name }}.utils.paths import models_dir
+
+# Define tracking and artifact paths
+mlflow_db_path = models_dir("mlruns.db").as_posix()
+mlflow_artifacts_path = models_dir("mlruns").as_posix()
+mlflow.set_tracking_uri(f"sqlite:///{mlflow_db_path}")
+
+# Check if the experiment already exists and create it if not
+experiment_name = "my_experiment"
+experiment = mlflow.get_experiment_by_name(experiment_name)
+if experiment is None:
+    mlflow.create_experiment(
+        name=experiment_name,
+        artifact_location=f"file:///{mlflow_artifacts_path}"
+    )
+mlflow.set_experiment(experiment_name)
+
+print(f"MLflow tracking URI set to: {mlflow.get_tracking_uri()}")
+print(f"MLflow artifacts will be stored in: {mlflow_artifacts_path}")
+```
+
+Then you can use MLflow to log parameters, metrics, and artifacts as usual, for example:
+
+```python
+from sklearn.linear_model import LinearRegression
+from sklearn.datasets import make_regression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error
+
+# Create dummy data and train a model
+X, y = make_regression(n_samples=100, n_features=1, noise=0.1, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+y_pred = model.predict(X_test)
+mse = mean_squared_error(y_test, y_pred)
+
+# Log parameters and metrics
+with mlflow.start_run():
+    mlflow.log_param("fit_intercept", model.fit_intercept)
+    mlflow.log_metric("mse", mse)
+    mlflow.sklearn.log_model(model, artifact_path="model")
+
+print("Run logged successfully.")
+
+```
+
+MLflow still creates an empty `mlruns/` directory in the current working directory, but doesn't use it. This happens because:
+
+- MLflow initializes its default file-based backend store (`FileStore`) by default pointing to `./mlruns`, even when you're using a database URI like `sqlite:///....`
+
+- It's a side effect of how MLflow internally checks or sets up the default experiment (ID = 0) and stores backend metadata briefly, even if unused.
+
+To avoid confusion, you can safely remove the `mlruns/` directory in your current working directory. All relevant data will be stored in the `models/` directory as specified. Yo can also run the following command to remove the `mlruns/` directory:
+
+```python
+import os
+import shutil
+cwd_mlruns = os.path.join(os.getcwd(), "mlruns")
+if os.path.isdir(cwd_mlruns) and not os.listdir(cwd_mlruns):
+    shutil.rmtree(cwd_mlruns)
+```
+
+Then Launch the MLflow UI to visualize your experiments:
+
+```bash
+mlflow ui --backend-store-uri sqlite:///<path_to_your_project>/models/mlruns.db 
 ```
 
 ---

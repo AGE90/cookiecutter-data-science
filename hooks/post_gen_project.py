@@ -110,7 +110,6 @@ def setup_mlflow():
     try:
         subprocess.check_call(["poetry", "add"] +
                               ["--group", "data-science", "mlflow"])
-        os.makedirs("models/mlruns", exist_ok=True)
         print(f"{MSG_COLOR}MLflow directory created successfully.{RESET_ALL}")
     except subprocess.CalledProcessError as e:
         print(f"{ERROR_COLOR}Error setting up MLflow: {e}{RESET_ALL}")
@@ -125,10 +124,6 @@ def setup_dvc():
                               ["--group", "data-science", "dvc"])
         # Initialize DVC repository
         subprocess.check_call(["dvc", "init"])
-        # Create default .dvc directories
-        os.makedirs("data/raw", exist_ok=True)
-        os.makedirs("data/processed", exist_ok=True)
-        os.makedirs("data/external", exist_ok=True)
         print(f"{MSG_COLOR}DVC initialized successfully.{RESET_ALL}")
     except subprocess.CalledProcessError as e:
         print(f"{ERROR_COLOR}Error initializing DVC: {e}{RESET_ALL}")
@@ -166,15 +161,14 @@ def main():
         configure_poetry()
         add_dependencies()
         create_env_file()
+        # Handle data science tools setup
+        if USE_MLFLOW.lower() == "yes":
+            setup_mlflow()
+
+        if USE_DVC.lower() == "yes":
+            setup_dvc()
     else:
         print(f"{MSG_COLOR}Skipping virtual environment setup.{RESET_ALL}")
-
-    # Handle data science tools setup
-    if USE_MLFLOW.lower() == "yes":
-        setup_mlflow()
-
-    if USE_DVC.lower() == "yes":
-        setup_dvc()
 
     # Handle Git repository initialization
     if INITIALIZE_GIT_REPOSITORY.lower() == "yes":

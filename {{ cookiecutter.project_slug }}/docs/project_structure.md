@@ -34,7 +34,6 @@ This document provides a detailed explanation of the project's directory structu
 │   └── contributing.md    <- Guidelines for contributing to the project.
 ├── logs                   <- Log files.
 ├── models                 <- Trained and serialized models, model predictions, or model summaries.
-│   └── mlruns             <- MLFlow experiment tracking.
 ├── notebooks              <- Jupyter notebooks. Naming convention is a number (for ordering),
 │                             the creator's initials, and a short `-` delimited description, e.g.
 │                             `01-AGE90-initial_data_exploration`.
