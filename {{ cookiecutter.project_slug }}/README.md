@@ -137,11 +137,15 @@ model.fit(X_train, y_train)
 y_pred = model.predict(X_test)
 mse = mean_squared_error(y_test, y_pred)
 
+
 # Log parameters and metrics
 with mlflow.start_run():
     mlflow.log_param("fit_intercept", model.fit_intercept)
     mlflow.log_metric("mse", mse)
-    mlflow.sklearn.log_model(model, artifact_path="model")
+    mlflow.sklearn.log_model(
+        model,
+        name="model"
+    )
 
 print("Run logged successfully.")
 
