@@ -41,7 +41,7 @@ It is also recommended to have **Poetry** installed for managing project depende
 2. **Run Cookiecutter** with the following command to generate a new project from this template:
 
     ```bash
-    cookiecutter https://github.com/AGE90/-cookiecutter-data-science
+    cookiecutter https://github.com/AGE90/cookiecutter-data-science.git
     ```
 
 3. **Follow the prompts**: Cookiecutter will ask you a series of questions (e.g., project name, author, etc.) and create a customized project structure based on your responses.
