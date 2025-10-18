@@ -4,7 +4,7 @@ It is intended to be used in conjunction with a .env file to load
 environment variables without hardcoding them in the codebase.
 """
 import os
-from python-dotenv import load_dotenv
+from dotenv import load_dotenv
 
 load_dotenv()
 
