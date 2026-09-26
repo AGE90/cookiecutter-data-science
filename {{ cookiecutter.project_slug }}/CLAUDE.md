@@ -16,6 +16,7 @@
 ## Commands
 
 - `make install`: install all dependency groups
+- `make data` / `make features` / `make train` / `make predict`: pipeline steps (`make pipeline` runs the first three). File names and `TARGET` are constants at the top of each module
 - `make check`: ruff format + ruff check + mypy
 - `make test`: pytest with coverage (tests live in `tests/unit` and `tests/e2e`)
 {%- if cookiecutter.use_mlflow == "yes" %}

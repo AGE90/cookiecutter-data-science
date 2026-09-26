@@ -45,6 +45,22 @@ setup: ## Run full environment setup
 notebook: ## Launch Jupyter Lab
 	uv run --with jupyterlab jupyter lab
 
+# Pipeline commands (data/raw -> data/interim -> data/processed -> models)
+.PHONY: data features train predict pipeline
+data: ## Clean raw data into data/interim
+	uv run python -m {{ cookiecutter.module_name }}.data.make_dataset
+
+features: ## Build features into data/processed
+	uv run python -m {{ cookiecutter.module_name }}.features.build_features
+
+train: ## Train the model and save it to models/
+	uv run python -m {{ cookiecutter.module_name }}.models.train_model
+
+predict: ## Write predictions to data/processed
+	uv run python -m {{ cookiecutter.module_name }}.models.predict_model
+
+pipeline: data features train ## Run data, features and train in order
+
 # Code quality commands
 .PHONY: lint format typecheck check
 lint: ## Run ruff linter on src and tests
@@ -70,6 +86,7 @@ test-cov-html: ## Run tests with HTML coverage report
 	uv run pytest --cov=src --cov-report=html
 	@echo "Coverage report generated in htmlcov/index.html"
 
+{% if cookiecutter.use_dvc == "yes" -%}
 # Data science commands
 .PHONY: dvc-pull dvc-push dvc-status
 dvc-pull: ## Pull latest data from DVC remote
@@ -81,11 +98,14 @@ dvc-push: ## Push data changes to DVC remote
 dvc-status: ## Check DVC data status
 	uv run dvc status
 
+{% endif -%}
+{% if cookiecutter.use_mlflow == "yes" -%}
 # MLflow commands
 .PHONY: mlflow-ui
 mlflow-ui: ## Start MLflow tracking server
 	uv run mlflow ui
 
+{% endif -%}
 # Cleanup commands
 .PHONY: clean clean-pyc clean-build clean-test
 clean: clean-pyc clean-build clean-test ## Remove all build artifacts

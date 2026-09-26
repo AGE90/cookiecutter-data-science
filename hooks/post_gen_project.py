@@ -30,6 +30,7 @@ USE_DVC = "{{ cookiecutter.use_dvc }}"
 
 # Dependency groups from cookiecutter.json
 PROJECT_DEPENDENCIES = "{{ cookiecutter.project_dependencies }}"
+EXTRA_DEPENDENCIES = "{{ cookiecutter.extra_dependencies }}"
 DEV_DEPENDENCIES = "{{ cookiecutter.development_dependencies }}"
 NOTEBOOK_DEPENDENCIES = "{{ cookiecutter.notebook_dependencies }}"
 DATA_SCIENCE_DEPENDENCIES = "{{ cookiecutter.data_science_dependencies }}"
@@ -75,6 +76,7 @@ def add_dependencies():
 
     dep_groups = [
         (PROJECT_DEPENDENCIES, []),
+        (EXTRA_DEPENDENCIES, []),
         (DEV_DEPENDENCIES, ["--group", "dev"]),
         (NOTEBOOK_DEPENDENCIES, ["--group", "notebook"]),
         (DATA_SCIENCE_DEPENDENCIES, ["--group", "data-science"]),

@@ -10,6 +10,7 @@ A **Cookiecutter** template to jumpstart data science projects with a well-organ
 - **Code Quality**: ruff (lint + format), mypy and pre-commit, passing out of the box
 - **Claude Code Skill**: Scaffold a project by asking Claude, in one command, without Claude writing the files ([see below](#claude-code-skill))
 - **Data Science Tools**: Incorporates popular data science libraries
+- **Pipeline Stubs**: `make data`, `make features`, `make train` and `make predict` run a small working pipeline you edit for your problem
 - **Development Tools**: Code quality tools and testing frameworks
 - **Project Structure**: Organized directory structure for data science projects
 - **Best Practices**: Follows best practices for reproducibility.
@@ -106,34 +107,27 @@ This template provides a well-structured project layout with the following direc
 ```text
 .
 ├── LICENSE                <- Omitted when "No license file" is selected.
-├── README.md              <- The top-level README for developers using this project.
+├── README.md              <- Install, pipeline, usage and structure of the project.
 ├── CHANGELOG.md           <- A changelog to track project updates and versions.
 ├── CLAUDE.md              <- Project conventions for Claude Code.
 ├── pyproject.toml         <- Project metadata, dependency groups and tool configuration.
 ├── uv.lock                <- Locked dependency versions (commit it).
 ├── .python-version        <- Python version pinned by uv.
 ├── .gitignore             <- Specifies intentionally untracked files to ignore.
-├── Makefile               <- Automate common tasks like testing, running, or setting up.
+├── Makefile               <- Tasks: install, pipeline (data/features/train/predict), check, test.
 ├── .env                   <- Environment variables (ignored by git).
 ├── .pre-commit-config.yaml <- Pre-commit hooks for linting/formatting.
 ├── app                    <- Main application code (if applicable).
 │   └── main.py            <- Entry point for the application.
 ├── config                 <- Configuration files for the project.
-│   ├── dev.yml            <- Development environment configuration.
-│   └── prod.yml           <- Production environment configuration.
 ├── data
 │   ├── external           <- Data from third party sources.
 │   ├── interim            <- Intermediate data that has been transformed.
 │   ├── processed          <- The final, canonical data sets for modeling.
 │   └── raw                <- The original, immutable data dump.
-├── docs                   <- Project documentation.
-│   ├── project_structure.md    <- Project structure tree.
-│   ├── install.md         <- Detailed instructions to set up this project.
-│   ├── api.md             <- API documentation.
-│   ├── user_guide.md      <- User guide for the project.
-│   ├── developer_guide.md <- Guide for developers contributing to the project.
-│   ├── code_of_conduct.md <- Code of conduct for contributors.
-│   └── contributing.md    <- Guidelines for contributing to the project.
+├── docs                   <- Project documentation (install and usage live in README.md).
+│   ├── developer_guide.md <- Code style, testing, Git workflow and contributing.
+│   └── code_of_conduct.md <- Code of conduct for contributors.
 ├── logs                   <- Log files.
 ├── models                 <- Trained and serialized models, model predictions, or model summaries.
 ├── notebooks              <- Jupyter notebooks. Naming convention is a number (for ordering),
@@ -150,26 +144,26 @@ This template provides a well-structured project layout with the following direc
 │       ├── __init__.py    <- Makes {{ cookiecutter.module_name }} a Python module.
 │       ├── __main__.py    <- Main entry point for the module.
 │       ├── credentials.py <- Credentials builder for the project.
-│       ├── data           <- Scripts to download or generate data.
+│       ├── data           <- Loading and cleaning data.
 │       │   ├── data_loader.py
-│       │   └── make_dataset.py
+│       │   └── make_dataset.py    <- `make data`: data/raw -> data/interim
 │       ├── features       <- Scripts to turn raw data into features for modeling.
 │       │   ├── feature_engineering.py
-│       │   └── build_features.py
+│       │   └── build_features.py  <- `make features`: data/interim -> data/processed
 │       ├── models         <- Scripts to train models and then use trained models to make predictions.
 │       │   ├── model_utils.py
-│       │   ├── predict_model.py
-│       │   └── train_model.py
+│       │   ├── predict_model.py   <- `make predict`: model + features -> predictions
+│       │   └── train_model.py     <- `make train`: data/processed -> models/
 │       ├── utils          <- Scripts to help with common tasks.
 │       │   └── paths.py   <- Helper functions for relative file referencing across project.
 │       └── visualization  <- Scripts to create exploratory and results oriented visualizations.
 │           └── visualize.py
 └── tests                  <- Test files should mirror the structure of `src`.
     ├── __init__.py
-    ├── conftest.py        <- Shared pytest fixtures.
     ├── e2e/               <- End-to-end or integration tests.
     └── unit/              <- Unit tests, mirroring src structure.
-        └── test_paths.py  <- Starter test, so `make test` passes out of the box.
+        ├── test_paths.py     <- Starter tests, so `make test` passes out of the box.
+        └── test_pipeline.py
 ```
 
 ---
@@ -210,7 +204,7 @@ The option `project_version` is used as the initial version of the project in th
 
 ### Python Version
 
-The option `python_version` is used as the minimum Python version required for the project (`requires-python` in `pyproject.toml`), the ruff target version and the version pinned by uv in `.python-version`. It must have the format `3.X` (e.g., "3.12").
+The option `python_version` is used as the minimum Python version required for the project (`requires-python` in `pyproject.toml`), the ruff target version and the version pinned by uv in `.python-version`. It must have the format `3.X`. By default it is set to `3.12`.
 
 ### License Selection
 
@@ -226,7 +220,11 @@ The option `initialize_env` is used to determine whether to set up the uv enviro
 
 ### Project Dependencies
 
-The option `project_dependencies` is used to specify the base project dependencies. It should be a list of Python packages separated by commas. For example, "pandas, numpy, matplotlib". By default its set to `[requests, pydantic, pyprojroot, python-dotenv]`.
+The option `project_dependencies` is used to specify the base project dependencies. It should be a list of Python packages separated by commas. By default its set to `[requests, pydantic, pyprojroot, python-dotenv]`. Keep `pyprojroot` and `python-dotenv`: the template code imports them.
+
+### Extra Dependencies
+
+The option `extra_dependencies` adds packages to the main dependencies **on top of** all the defaults, so you don't have to repeat a default list to add one library. For example, `extra_dependencies="xgboost, lightgbm"`. Empty by default.
 
 ### Development Dependencies
 
@@ -238,11 +236,11 @@ The option `notebook_dependencies` is used to specify the notebook dependencies 
 
 ### Data Science Dependencies
 
-The option `data_science_dependencies` is used to specify the data science dependencies such as `pandas`, `numpy`, `matplotlib`, etc. By default its set to `["openpyxl, scipy, statsmodels, scikit-learn, joblib"]`.
+The option `data_science_dependencies` is used to specify the data science dependencies such as `pandas`, `numpy`, `matplotlib`, etc. By default its set to `[pandas, numpy, openpyxl, scipy, statsmodels, scikit-learn, joblib]`. The template code uses `pandas`, `numpy`, `scikit-learn` and `joblib`, so keep them if you replace this list.
 
 ### Visualization Dependencies
 
-The option `visualization_dependencies` is used to specify the visualization dependencies such as `seaborn`, `plotly`, `altair`, etc. By default its set to `[seaborn, missingno]`.
+The option `visualization_dependencies` is used to specify the visualization dependencies such as `seaborn`, `plotly`, `altair`, etc. By default its set to `[matplotlib, seaborn, missingno]`. `visualize.py` uses `matplotlib` and `seaborn`.
 
 ### Testing Dependencies
 
@@ -250,11 +248,11 @@ The option `testing_dependencies` is used to specify the testing dependencies. B
 
 ### Use MLFlow
 
-The option `use_mlflow` is used to determine whether to use MLFlow for experiment tracking and model deployment. If selected, `mlflow` is added to the `data-science` group. Start the UI with `make mlflow-ui`.
+The option `use_mlflow` is used to determine whether to use MLFlow for experiment tracking and model deployment. If selected, `mlflow` is added to the `data-science` group, `make train` logs each run with `log_mlflow_experiment`, and `make mlflow-ui` starts the UI. If not selected, none of the MLflow code, Make targets or docs are generated.
 
 ### Use DVC
 
-The option `use_dvc` is used to determine whether to use DVC for data versioning and management. If selected, `dvc` is added to the `data-science` group and `dvc init` is run. `dvc init` needs a Git repository, so it only runs when `initialize_env` and `initialize_git_repository` are both `yes`.
+The option `use_dvc` is used to determine whether to use DVC for data versioning and management. If selected, `dvc` is added to the `data-science` group and `dvc init` is run. `dvc init` needs a Git repository, so it only runs when `initialize_env` and `initialize_git_repository` are both `yes`. If not selected, the `dvc-*` Make targets and DVC docs are not generated.
 
 ### Initialize Git Repository
 

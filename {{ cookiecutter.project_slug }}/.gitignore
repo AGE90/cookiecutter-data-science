@@ -161,6 +161,10 @@ site/
 *.sav
 *.rds
 
+# MLflow tracking store and artifacts
+mlflow.db
+mlruns/
+
 # Visualization / design / reports
 *.pdf
 *.svg

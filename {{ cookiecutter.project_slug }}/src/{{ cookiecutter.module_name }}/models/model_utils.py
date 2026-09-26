@@ -149,6 +149,7 @@ def cross_validate_model(
     }
 
 
+{% if cookiecutter.use_mlflow == "yes" -%}
 def log_mlflow_experiment(
     model: Any,
     params: dict[str, Any],
@@ -178,6 +179,7 @@ def log_mlflow_experiment(
     # Imported lazily so the module works when MLflow is not installed
     import mlflow
     import mlflow.sklearn
+    import skops.io as sio
 
     mlflow.set_experiment(experiment_name)
 
@@ -188,13 +190,15 @@ def log_mlflow_experiment(
         # Log metrics
         mlflow.log_metrics(metrics)
 
-        # Log model
-        if model_name:
-            mlflow.sklearn.log_model(model, model_name)
-        else:
-            mlflow.sklearn.log_model(model, "model")
+        # Log model. MLflow saves it with skops, which only reloads trusted types;
+        # this model was trained in this process, so its own types are trusted.
+        trusted = sio.get_untrusted_types(data=sio.dumps(model))
+        mlflow.sklearn.log_model(
+            model, name=model_name or "model", skops_trusted_types=trusted
+        )
 
 
+{% endif -%}
 def save_model(model: Any, filepath: str | Path, engine: str = "joblib") -> None:
     """
     Save a trained model to disk.

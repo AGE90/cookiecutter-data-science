@@ -247,7 +247,9 @@ uv run --with jupyterlab jupyter lab
 3. Make your changes
 4. Run tests and formatters
 5. Submit a pull request
+{%- if cookiecutter.license != "No license file" %}
 
 ## License
 
 This project is licensed under the {{ cookiecutter.license }} License - see the [LICENSE](../LICENSE) file for details.
+{%- endif %}

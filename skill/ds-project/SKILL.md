@@ -11,7 +11,7 @@ The template writes every file. Do NOT write project files yourself, and do NOT 
 
 1. **Collect the answers.** Infer them from the request. Ask one short question only for what you can't infer; `project_name` is the only one that really matters. Everything else has a sensible default (table below).
    - Take the author details from `git config user.name` and `git config user.email` unless the user gave them.
-   - Extra libraries the user mentions go in the matching `*_dependencies` key, **appended to the default list** (the value replaces the default, it doesn't extend it).
+   - Extra libraries the user mentions go in `extra_dependencies` (comma-separated). It's added on top of every default list, so never repeat a default list just to add one package.
 2. **Run one command** from the directory where the project should be created (or pass `-o <dir>`):
 
    ```bash
@@ -19,7 +19,8 @@ The template writes every file. Do NOT write project files yourself, and do NOT 
      project_name="Churn Model" \
      project_description="Predict customer churn" \
      author_name="..." author_email="..." \
-     use_mlflow=yes use_dvc=no
+     use_mlflow=yes use_dvc=no \
+     extra_dependencies="xgboost"
    ```
 
    - Pass only keys that differ from the defaults. Quote every value.
@@ -40,20 +41,21 @@ The template writes every file. Do NOT write project files yourself, and do NOT 
 | `project_description` | `A short description of the project.` | |
 | `project_url` | `https://example.com` | Must be a valid URL (scheme + host) |
 | `project_version` | `0.1.0` | |
-| `python_version` | `3.11` | Format `3.X` |
+| `python_version` | `3.12` | Format `3.X` |
 | `license` | `MIT` | `MIT`, `BSD-3-Clause`, `No license file` |
 | `initialize_env` | `yes` | `uv add` all dependency groups. `no` = files only, nothing installed |
 | `project_dependencies` | `requests, pydantic, pyprojroot, python-dotenv` | Main deps. Keep `pyprojroot` and `python-dotenv` (the template code imports them) |
+| `extra_dependencies` | empty | Added to the main deps on top of all defaults. **Use this for any extra library the user asks for** |
 | `development_dependencies` | `mypy, ruff, pre-commit` | `dev` group |
 | `notebook_dependencies` | `ipykernel` | `notebook` group |
-| `data_science_dependencies` | `openpyxl, scipy, statsmodels, scikit-learn, joblib` | `data-science` group |
-| `visualization_dependencies` | `seaborn, missingno` | `viz` group |
+| `data_science_dependencies` | `pandas, numpy, openpyxl, scipy, statsmodels, scikit-learn, joblib` | `data-science` group. Only override to *remove* packages; keep `pandas, numpy, scikit-learn, joblib` |
+| `visualization_dependencies` | `matplotlib, seaborn, missingno` | `viz` group. Keep `matplotlib, seaborn` |
 | `testing_dependencies` | `pytest, pytest-cov, pytest-mock` | `test` group |
-| `use_mlflow` | `yes` | Adds `mlflow` to `data-science` |
+| `use_mlflow` | `yes` | Adds `mlflow` to `data-science`; `make train` logs runs. `no` generates no MLflow code |
 | `use_dvc` | `yes` | Adds `dvc` and runs `dvc init` (needs `initialize_env` and `initialize_git_repository` both `yes`) |
 | `initialize_git_repository` | `yes` | `git init` plus an initial commit |
 
-Dependency values are comma-separated package names, e.g. `data_science_dependencies="openpyxl, scipy, statsmodels, scikit-learn, joblib, xgboost"`.
+Dependency values are comma-separated package names, e.g. `extra_dependencies="xgboost, lightgbm"`.
 
 ## If it fails
 

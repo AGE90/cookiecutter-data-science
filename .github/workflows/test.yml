@@ -1,0 +1,35 @@
+name: Test template
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  render:
+    # Fast: render the template with several option combinations (no network hooks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+      - run: uvx --with cookiecutter pytest tests/
+
+  generate:
+    # Full: generate a real project (uv env, git, DVC) and run its own checks
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        options:
+          - ""
+          - "use_mlflow=no use_dvc=no license='No license file'"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+      - run: |
+          git config --global user.name "CI"
+          git config --global user.email "ci@example.com"
+      - name: Generate project
+        # eval so quoted values in matrix.options stay single arguments
+        run: eval "uvx cookiecutter . --no-input -o '$RUNNER_TEMP' project_name='CI Project' ${{ matrix.options }}"
+      - name: Run generated project checks
+        working-directory: ${{ runner.temp }}/ci-project
+        run: make check && make test

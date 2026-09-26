@@ -49,6 +49,18 @@ def test_render(tmp_path, license_):
     assert not leftovers, leftovers
 
 
+@pytest.mark.parametrize("enabled", ["yes", "no"])
+def test_optional_tools_are_left_out(tmp_path, enabled):
+    project = render(tmp_path, use_mlflow=enabled, use_dvc=enabled)
+    generated = "\n".join(
+        p.read_text()
+        for p in [project / "Makefile", project / "README.md", *project.rglob("*.py")]
+    )
+
+    assert ("mlflow" in generated) == (enabled == "yes")
+    assert ("dvc" in generated) == (enabled == "yes")
+
+
 def test_invalid_input_fails(tmp_path):
     with pytest.raises(Exception):
         render(tmp_path, author_email="not-an-email")

@@ -2,194 +2,142 @@
 
 {{ cookiecutter.project_description }}
 
----
-
-## Project Overview
-
 <!-- Add a brief overview of the project here. -->
 
 ---
 
-## Installation Steps
+## Installation
 
-Please read [install.md](docs/install.md) for details on how to set up this project.
+Requires [uv](https://docs.astral.sh/uv/getting-started/installation/). uv installs Python {{ cookiecutter.python_version }} for you if it is missing.
 
----
+```bash
+git clone <repository-url>
+cd {{ cookiecutter.project_slug }}
+make install                  # uv sync --all-groups: creates .venv with every dependency group
+uv run pre-commit install     # optional: lint and format on every commit
+```
 
-## Key Features
-
-- **Dependency Management**: Using uv for fast, reproducible dependency management
-- **Data Version Control**: Optional DVC integration for data versioning
-- **ML Experiment Tracking**: Optional MLflow integration for experiment tracking
-- **Jupyter Support**: Full support for Jupyter notebooks
-- **Code Quality**: Pre-configured with ruff (lint + format), mypy and pre-commit
-- **Testing**: pytest setup with coverage reporting
-
-### Quick Start
-
-1. Install uv (see [Installation Guide](docs/install.md))
-2. Clone the repository
-3. Install dependencies:
-
-   ```bash
-   uv sync
-   ```
-
-4. Activate the environment:
-
-   ```bash
-   source .venv/bin/activate
-   ```
+Run any command inside the environment with `uv run <command>`, or activate it with `source .venv/bin/activate`. Add dependencies with `uv add <package>` (or `uv add --group <dev|test|notebook|data-science|viz> <package>`) and update them with `uv lock --upgrade && uv sync`.
 
 ---
 
-## Basic Usage for Data Science Tasks
+## Usage
 
-### Working in Notebooks
+Run `make help` to list every task.
 
-To enable autoreload in notebooks use the following magic command at the start of your notebook. This will automatically reload any changes to your code.
+### Pipeline
+
+The pipeline is a set of small stubs to edit for your problem. Each step reads the previous step's output:
+
+| Command | Module | Reads | Writes |
+|---|---|---|---|
+| `make data` | `data/make_dataset.py` | `data/raw/dataset.csv` | `data/interim/dataset_clean.csv` |
+| `make features` | `features/build_features.py` | `data/interim/dataset_clean.csv` | `data/processed/features.csv` |
+| `make train` | `models/train_model.py` | `data/processed/features.csv` | `models/model.joblib` |
+| `make predict` | `models/predict_model.py` | `models/model.joblib` + features | `data/processed/predictions.csv` |
+
+`make pipeline` runs `data`, `features` and `train` in order. File names and the target column (`TARGET = "target"`) are constants at the top of each module.
+
+### Code quality and tests
+
+```bash
+make check    # ruff format + ruff check + mypy
+make test     # pytest with coverage
+```
+
+### Paths and data
+
+Never hardcode paths. The helpers in `utils/paths.py` resolve from the project root, so they work the same in scripts, notebooks and tests:
+
+```python
+from {{ cookiecutter.module_name }}.data.data_loader import load_csv
+from {{ cookiecutter.module_name }}.utils.paths import data_raw_dir, reports_figures_dir
+from {{ cookiecutter.module_name }}.visualization.visualize import plot_distribution
+
+df = load_csv(data_raw_dir("dataset.csv"))
+plot_distribution(
+    df["size"],
+    title="Size distribution",
+    xlabel="size",
+    save_path=reports_figures_dir("size.png"),
+)
+```
+
+### Notebooks
+
+Start Jupyter Lab with `make notebook`. Put reusable code in `src/` and import it; add this at the top of a notebook to pick up code changes without restarting the kernel:
 
 ```python
 %load_ext autoreload
 %autoreload 2
 ```
+{%- if cookiecutter.use_dvc == "yes" %}
 
-### Data Management
+### Data versioning (DVC)
 
-```python
-from {{ cookiecutter.module_name }}.utils.paths import data_raw_dir
-from {{ cookiecutter.module_name }}.data.data_loader import load_csv
-
-# Process raw data
-df = load_csv(data_raw_dir('input.csv'))
-```
-
-### Model Development
-
-```python
-from {{ cookiecutter.module_name }}.utils.paths import data_processed_dir
-from {{ cookiecutter.module_name }}.models import train_model
-
-# Train model
-model = train_model(
-    data_path=data_processed_dir('train.csv'),
-    model_type='random_forest'
-)
-```
-
-### Visualization
-
-```python
-from {{ cookiecutter.module_name }}.utils.paths import reports_figures_dir
-from {{ cookiecutter.module_name }}.visualization.visualize import plot_distribution
-
-# Create visualization
-plot_distribution(
-    data=results_df,
-    save_path=reports_figures_dir('results.png'),
-)
-```
-
-### Local Experiment Tracking
-
-When traicking experiments locally it is recommended to MLflow set up the tracking URI to the `models/` directory to store the artifacts and database files. To achieve this, you can use the following code snippet in your scripts or notebooks:
-
-```python
-import mlflow
-from {{ cookiecutter.module_name }}.utils.paths import models_dir
-
-# Define tracking and artifact paths
-mlflow_db_path = models_dir("mlruns.db").as_posix()
-mlflow_artifacts_path = models_dir("mlruns").as_posix()
-mlflow.set_tracking_uri(f"sqlite:///{mlflow_db_path}")
-
-# Check if the experiment already exists and create it if not
-experiment_name = "my_experiment"
-experiment = mlflow.get_experiment_by_name(experiment_name)
-if experiment is None:
-    mlflow.create_experiment(
-        name=experiment_name,
-        artifact_location=f"file:///{mlflow_artifacts_path}"
-    )
-mlflow.set_experiment(experiment_name)
-
-print(f"MLflow tracking URI set to: {mlflow.get_tracking_uri()}")
-print(f"MLflow artifacts will be stored in: {mlflow_artifacts_path}")
-```
-
-Then you can use MLflow to log parameters, metrics, and artifacts as usual, for example:
-
-```python
-from sklearn.linear_model import LinearRegression
-from sklearn.datasets import make_regression
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_squared_error
-
-# Create dummy data and train a model
-X, y = make_regression(n_samples=100, n_features=1, noise=0.1, random_state=42)
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
-
-model = LinearRegression()
-model.fit(X_train, y_train)
-
-y_pred = model.predict(X_test)
-mse = mean_squared_error(y_test, y_pred)
-
-
-# Log parameters and metrics
-with mlflow.start_run():
-    mlflow.log_param("fit_intercept", model.fit_intercept)
-    mlflow.log_metric("mse", mse)
-    mlflow.sklearn.log_model(
-        model,
-        name="model"
-    )
-
-print("Run logged successfully.")
-
-```
-
-MLflow still creates an empty `mlruns/` directory in the current working directory, but doesn't use it. This happens because:
-
-- MLflow initializes its default file-based backend store (`FileStore`) by default pointing to `./mlruns`, even when you're using a database URI like `sqlite:///....`
-
-- It's a side effect of how MLflow internally checks or sets up the default experiment (ID = 0) and stores backend metadata briefly, even if unused.
-
-To avoid confusion, you can safely remove the `mlruns/` directory in your current working directory. All relevant data will be stored in the `models/` directory as specified. Yo can also run the following command to remove the `mlruns/` directory:
-
-```python
-import os
-import shutil
-cwd_mlruns = os.path.join(os.getcwd(), "mlruns")
-if os.path.isdir(cwd_mlruns) and not os.listdir(cwd_mlruns):
-    shutil.rmtree(cwd_mlruns)
-```
-
-Then Launch the MLflow UI to visualize your experiments:
+Data files are not committed to Git; track them with DVC:
 
 ```bash
-mlflow ui --backend-store-uri sqlite:///<path_to_your_project>/models/mlruns.db 
+uv run dvc add data/raw/dataset.csv   # then commit the generated .dvc file
+uv run dvc remote add -d storage <remote-url>
+make dvc-push                         # upload data; `make dvc-pull` downloads it
 ```
+{%- endif %}
+{%- if cookiecutter.use_mlflow == "yes" %}
+
+### Experiment tracking (MLflow)
+
+`make train` logs parameters, metrics and the model to MLflow with `log_mlflow_experiment` (in `models/model_utils.py`). Runs are stored in `mlflow.db` and `mlruns/` at the project root (both git-ignored). Browse them with:
+
+```bash
+make mlflow-ui    # http://127.0.0.1:5000
+```
+{%- endif %}
 
 ---
 
-## Project Organization
+## Project Structure
 
-Please refer to the project structure tree in the [project_structure.md](docs/project_structure.md) for a detailed overview of the directory layout and file organization.
+```text
+├── CLAUDE.md               <- Project conventions for Claude Code
+├── Makefile                <- Tasks: `make help`
+├── pyproject.toml          <- Metadata, dependency groups and tool configuration
+├── uv.lock                 <- Locked dependency versions
+├── app/                    <- Application entry point (if applicable)
+├── config/                 <- Configuration files
+├── data/
+│   ├── raw/                <- Original, immutable data
+│   ├── interim/            <- Intermediate, cleaned data
+│   ├── processed/          <- Final, model-ready data
+│   └── external/           <- Data from third-party sources
+├── docs/                   <- Developer guide and code of conduct
+├── logs/                   <- Log files
+├── models/                 <- Trained models
+├── notebooks/              <- Exploration notebooks, named e.g. `01-abc-initial-eda.ipynb`
+├── references/             <- Data dictionaries, manuals, papers
+├── reports/figures/        <- Generated figures
+├── scripts/                <- Helper shell scripts
+├── src/{{ cookiecutter.module_name }}/
+│   ├── credentials.py      <- Loads secrets from `.env`
+│   ├── data/               <- Loading (`data_loader.py`) and cleaning (`make_dataset.py`)
+│   ├── features/           <- Feature engineering helpers and `build_features.py`
+│   ├── models/             <- Model helpers, `train_model.py`, `predict_model.py`
+│   ├── utils/paths.py      <- Project-relative path helpers
+│   └── visualization/      <- Plotting helpers
+└── tests/                  <- `unit/` and `e2e/` tests
+```
 
 ---
 
 ## Documentation
 
-- [Installation Guide](docs/install.md): Detailed installation instructions
-- [User Guide](docs/user_guide.md): How to use the project
-- [Developer Guide](docs/developer_guide.md): Development guidelines
-- [Project Structure](docs/project_structure.md): Detailed project structure
-- [Contributing Guide](docs/contributing.md): How to contribute
-- [Code of Conduct](docs/code_of_conduct.md): Community guidelines
+- [Developer Guide](docs/developer_guide.md): code style, testing, Git workflow and contributing
+- [Code of Conduct](docs/code_of_conduct.md)
+{%- if cookiecutter.license != "No license file" %}
 
 ---
 
 ## License
 
-This project is licensed under the {{ cookiecutter.license }} License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the {{ cookiecutter.license }} License. See the [LICENSE](LICENSE) file for details.
+{%- endif %}
