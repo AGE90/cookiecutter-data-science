@@ -3,16 +3,12 @@ Data loading utilities.
 """
 
 from pathlib import Path
-from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
 
 
-def load_csv(
-    filepath: Union[str, Path],
-    **kwargs
-) -> pd.DataFrame:
+def load_csv(filepath: str | Path, **kwargs) -> pd.DataFrame:
     """Load data from a CSV file.
 
     Parameters
@@ -30,9 +26,7 @@ def load_csv(
 
 
 def load_excel(
-    filepath: Union[str, Path],
-    sheet_name: Optional[Union[str, int]] = 0,
-    **kwargs
+    filepath: str | Path, sheet_name: str | int | None = 0, **kwargs
 ) -> pd.DataFrame:
     """Load data from an Excel file.
 
@@ -52,10 +46,7 @@ def load_excel(
     return pd.read_excel(filepath, sheet_name=sheet_name, **kwargs)
 
 
-def load_parquet(
-    filepath: Union[str, Path],
-    **kwargs
-) -> pd.DataFrame:
+def load_parquet(filepath: str | Path, **kwargs) -> pd.DataFrame:
     """Load data from a Parquet file.
 
     Parameters
@@ -72,10 +63,7 @@ def load_parquet(
     return pd.read_parquet(filepath, **kwargs)
 
 
-def load_numpy(
-    filepath: Union[str, Path],
-    **kwargs
-) -> np.ndarray:
+def load_numpy(filepath: str | Path, **kwargs) -> np.ndarray:
     """Load data from a NumPy file.
 
     Parameters
@@ -89,4 +77,5 @@ def load_numpy(
         Loaded data
     """
 
-    return np.load(filepath, **kwargs)
+    data: np.ndarray = np.load(filepath, **kwargs)
+    return data

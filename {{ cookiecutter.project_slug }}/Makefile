@@ -1,7 +1,7 @@
 # Makefile for {{ cookiecutter.project_name }}
 
 # Default Python binary
-PYTHON := poetry run python
+PYTHON := uv run python
 
 # Directories to check
 SRC_DIRS := src tests
@@ -17,97 +17,78 @@ help: ## Show this help message
 # Installation commands
 .PHONY: install install-dev install-notebook install-data install-test install-minimal
 install: ## Install all dependencies (base + dev + extras)
-	poetry install --with dev,notebook,data-science,viz,test
+	uv sync --all-groups
 
 install-dev: ## Install only dev dependencies
-	poetry install --with dev
+	uv sync --no-default-groups --group dev
 
 install-notebook: ## Install notebook dependencies
-	poetry install --with notebook
+	uv sync --no-default-groups --group notebook
 
 install-data: ## Install data-science dependencies and viz dependencies
-	poetry install --with data-science,viz
+	uv sync --no-default-groups --group data-science --group viz
 
 install-test: ## Install testing dependencies
-	poetry install --with test
+	uv sync --no-default-groups --group test
 
 install-minimal: ## Install base (no extras)
-	poetry install
+	uv sync --no-default-groups
 
 # Development commands
 .PHONY: run setup notebook
 run: ## Run the application (example main)
-	$(PYTHON) src/{{ cookiecutter.module_name }}/__main__.py
+	uv run my-cli
 
 setup: ## Run full environment setup
 	bash scripts/setup_env.sh
 	
 notebook: ## Launch Jupyter Lab
-	poetry run jupyter lab
+	uv run --with jupyterlab jupyter lab
 
 # Code quality commands
 .PHONY: lint format typecheck check
 lint: ## Run ruff linter on src and tests
-	poetry run ruff check $(SRC_DIRS)
+	uv run ruff check $(SRC_DIRS)
 
-format: ## Format code with black
-	poetry run black $(SRC_DIRS)
+format: ## Format code with ruff
+	uv run ruff format $(SRC_DIRS)
 
 typecheck: ## Run type checks with mypy
-	poetry run mypy $(SRC_DIRS)
+	uv run mypy $(SRC_DIRS)
 
 check: format lint typecheck ## Run all code quality checks
 
 # Testing commands
-.PHONY: test test-watch test-cov test-cov-html
+.PHONY: test test-cov test-cov-html
 test: ## Run pytest on tests
-	poetry run pytest --cov=src
-
-test-watch: ## Auto-rerun tests on file change
-	poetry run ptw --runner "pytest --cov=src"
+	uv run pytest --cov=src
 
 test-cov: ## Run tests with coverage report
-	poetry run pytest --cov=src --cov-report=term-missing
+	uv run pytest --cov=src --cov-report=term-missing
 
 test-cov-html: ## Run tests with HTML coverage report
-	poetry run pytest --cov=src --cov-report=html
+	uv run pytest --cov=src --cov-report=html
 	@echo "Coverage report generated in htmlcov/index.html"
-
-# Documentation commands
-.PHONY: docs docs-serve docs-build
-docs: ## Build and serve documentation
-	poetry run mkdocs serve
-
-docs-serve: ## Serve documentation
-	poetry run mkdocs serve
-
-docs-build: ## Build documentation
-	poetry run mkdocs build
 
 # Data science commands
 .PHONY: dvc-pull dvc-push dvc-status
 dvc-pull: ## Pull latest data from DVC remote
-	poetry run dvc pull
+	uv run dvc pull
 
 dvc-push: ## Push data changes to DVC remote
-	poetry run dvc push
+	uv run dvc push
 
 dvc-status: ## Check DVC data status
-	poetry run dvc status
+	uv run dvc status
 
 # MLflow commands
 .PHONY: mlflow-ui
 mlflow-ui: ## Start MLflow tracking server
-	poetry run mlflow ui
-
-# Streamlit commands
-.PHONY: streamlit
-streamlit: ## Run Streamlit dashboard
-	poetry run streamlit run src/{{ cookiecutter.module_name }}/visualization/dashboard.py
+	uv run mlflow ui
 
 # Cleanup commands
-.PHONY: clean clean-pyc clean-build clean-test clean-docs
-clean: clean-pyc clean-build clean-test clean-docs ## Remove all build artifacts
+.PHONY: clean clean-pyc clean-build clean-test
+clean: clean-pyc clean-build clean-test ## Remove all build artifacts
 
 clean-pyc: ## Remove Python cache files
 	find . -type d -name "__pycache__" -exec rm -rf {} +
@@ -120,6 +101,3 @@ clean-build: ## Remove build artifacts
 
 clean-test: ## Remove test artifacts
 	rm -rf .coverage htmlcov/ .pytest_cache/
-
-clean-docs: ## Remove documentation build artifacts
-	rm -rf site/

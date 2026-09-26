@@ -6,8 +6,7 @@ This guide provides comprehensive information for developers working on the **{{
 
 ### Prerequisites
 
-- Python >= 3.9
-- Poetry (latest version)
+- [uv](https://docs.astral.sh/uv/) (latest version; installs Python for you)
 - Git
 - A code editor (VS Code recommended)
 
@@ -21,12 +20,12 @@ This guide provides comprehensive information for developers working on the **{{
 
 2. Install dependencies:
    ```bash
-   poetry install
+   uv sync
    ```
 
 3. Install pre-commit hooks:
    ```bash
-   poetry run pre-commit install
+   uv run pre-commit install
    ```
 
 ## Code Style
@@ -38,30 +37,28 @@ We follow strict code style guidelines to maintain code quality and consistency.
 - Follow [PEP 8](https://peps.python.org/pep-0008/) guidelines
 - Use type hints for all function parameters and return values
 - Write docstrings for all modules, classes, and functions
-- Keep lines under 88 characters (Black's default)
+- Keep lines under 88 characters (ruff's default)
 
 ### Code Formatting
 
 We use the following tools for code formatting:
 
-- **Black**: For code formatting
-- **Ruff**: For linting
+- **Ruff**: For formatting (`ruff format`) and linting (`ruff check`)
 - **MyPy**: For type checking
 
 Run the formatters:
 ```bash
-poetry run black .
-poetry run ruff check .
-poetry run mypy src
+uv run ruff format .
+uv run ruff check .
+uv run mypy src
 ```
 
 ### Pre-commit Hooks
 
 The following pre-commit hooks are configured:
-- `black`: Code formatting
-- `ruff`: Linting
+- `ruff-check`: Linting (with auto-fix)
+- `ruff-format`: Code formatting
 - `mypy`: Type checking
-- `pre-commit-hooks`: Basic file checks
 
 ## Testing
 
@@ -69,12 +66,12 @@ The following pre-commit hooks are configured:
 
 Run the test suite:
 ```bash
-poetry run pytest
+uv run pytest
 ```
 
 Run tests with coverage:
 ```bash
-poetry run pytest --cov=src
+uv run pytest --cov=src
 ```
 
 ### Writing Tests
@@ -134,7 +131,6 @@ def process_data(data: pd.DataFrame, column: str) -> pd.DataFrame:
 
 - Keep `README.md` up to date
 - Update documentation when adding new features
-- Use MkDocs for project documentation
 - Include examples in documentation
 
 ## Git Workflow
@@ -206,43 +202,31 @@ Types:
 
 Add a new dependency:
 ```bash
-poetry add package-name
+uv add package-name
 ```
 
 Add a development dependency:
 ```bash
-poetry add --group dev package-name
+uv add --group dev package-name
 ```
 
 ### Running Jupyter
 
 Start Jupyter Lab:
 ```bash
-poetry run jupyter lab
-```
-
-### Building Documentation
-
-Build docs:
-```bash
-poetry run mkdocs build
-```
-
-Serve docs locally:
-```bash
-poetry run mkdocs serve
+uv run --with jupyterlab jupyter lab
 ```
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **Poetry Environment Issues**
+1. **Virtual Environment Issues**
    - Delete `.venv` directory
-   - Run `poetry install` again
+   - Run `uv sync` again
 
 2. **Pre-commit Hook Failures**
-   - Run `poetry run pre-commit run --all-files`
+   - Run `uv run pre-commit run --all-files`
 
 3. **Test Failures**
    - Check test data

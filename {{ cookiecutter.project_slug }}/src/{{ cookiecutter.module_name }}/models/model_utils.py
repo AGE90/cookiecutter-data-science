@@ -2,11 +2,11 @@
 Model training and evaluation utilities.
 """
 
+import pickle
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union, Literal
+from typing import Any, Literal
 
-import mlflow
-import mlflow.sklearn
+import joblib
 import numpy as np
 import pandas as pd
 from sklearn.metrics import (
@@ -15,19 +15,17 @@ from sklearn.metrics import (
     mean_squared_error,
     precision_score,
     r2_score,
-    recall_score
+    recall_score,
 )
 from sklearn.model_selection import cross_val_score, train_test_split
-import joblib
-import pickle
 
 
 def train_test_split_data(
     X: pd.DataFrame,
-    y: Union[pd.Series, np.ndarray],
+    y: pd.Series | np.ndarray,
     test_size: float = 0.2,
-    random_state: int = 42
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    random_state: int = 42,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Split data into training and testing sets.
 
@@ -54,18 +52,17 @@ def train_test_split_data(
         Testing target.
     """
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y,
-        test_size=test_size,
-        random_state=random_state
+        X, y, test_size=test_size, random_state=random_state
     )
     return X_train, X_test, y_train, y_test
 
 
 def evaluate_classification(
-    y_true: Union[pd.Series, np.ndarray],
-    y_pred: Union[pd.Series, np.ndarray],
-    average: Literal['micro', 'macro', 'samples', 'weighted', 'binary'] | None = "binary"
-) -> Dict[str, Any]:
+    y_true: pd.Series | np.ndarray,
+    y_pred: pd.Series | np.ndarray,
+    average: Literal["micro", "macro", "samples", "weighted", "binary"]
+    | None = "binary",
+) -> dict[str, Any]:
     """
     Evaluate classification model performance.
 
@@ -84,17 +81,16 @@ def evaluate_classification(
         Dictionary of metric names and values: accuracy, precision, recall, f1.
     """
     return {
-        'accuracy': accuracy_score(y_true, y_pred),
-        'precision': precision_score(y_true, y_pred, average=average),
-        'recall': recall_score(y_true, y_pred, average=average),
-        'f1': f1_score(y_true, y_pred, average=average)
+        "accuracy": accuracy_score(y_true, y_pred),
+        "precision": precision_score(y_true, y_pred, average=average),
+        "recall": recall_score(y_true, y_pred, average=average),
+        "f1": f1_score(y_true, y_pred, average=average),
     }
 
 
 def evaluate_regression(
-    y_true: Union[pd.Series, np.ndarray],
-    y_pred: Union[pd.Series, np.ndarray]
-) -> Dict[str, float]:
+    y_true: pd.Series | np.ndarray, y_pred: pd.Series | np.ndarray
+) -> dict[str, float]:
     """
     Evaluate regression model performance.
 
@@ -111,19 +107,19 @@ def evaluate_regression(
         Dictionary of metric names and values: mse, rmse, r2.
     """
     return {
-        'mse': mean_squared_error(y_true, y_pred),
-        'rmse': np.sqrt(mean_squared_error(y_true, y_pred)),
-        'r2': r2_score(y_true, y_pred)
+        "mse": mean_squared_error(y_true, y_pred),
+        "rmse": np.sqrt(mean_squared_error(y_true, y_pred)),
+        "r2": r2_score(y_true, y_pred),
     }
 
 
 def cross_validate_model(
     model: Any,
     X: pd.DataFrame,
-    y: Union[pd.Series, np.ndarray],
+    y: pd.Series | np.ndarray,
     cv: int = 5,
-    scoring: str = 'accuracy'
-) -> Dict[str, Any]:
+    scoring: str = "accuracy",
+) -> dict[str, Any]:
     """
     Perform cross-validation on a model.
 
@@ -147,19 +143,19 @@ def cross_validate_model(
     """
     scores = cross_val_score(model, X, y, cv=cv, scoring=scoring)
     return {
-        'mean_score': scores.mean(),
-        'std_score': scores.std(),
-        'scores': scores,
+        "mean_score": scores.mean(),
+        "std_score": scores.std(),
+        "scores": scores,
     }
 
 
 def log_mlflow_experiment(
     model: Any,
-    params: Dict[str, Any],
-    metrics: Dict[str, float],
+    params: dict[str, Any],
+    metrics: dict[str, float],
     experiment_name: str,
-    run_name: Optional[str] = None,
-    model_name: Optional[str] = None
+    run_name: str | None = None,
+    model_name: str | None = None,
 ) -> None:
     """
     Log model training results to MLflow.
@@ -179,6 +175,10 @@ def log_mlflow_experiment(
     model_name : str, optional
         Optional name for the model.
     """
+    # Imported lazily so the module works when MLflow is not installed
+    import mlflow
+    import mlflow.sklearn
+
     mlflow.set_experiment(experiment_name)
 
     with mlflow.start_run(run_name=run_name):
@@ -195,11 +195,7 @@ def log_mlflow_experiment(
             mlflow.sklearn.log_model(model, "model")
 
 
-def save_model(
-    model: Any,
-    filepath: Union[str, Path],
-    engine: str = 'joblib'
-) -> None:
+def save_model(model: Any, filepath: str | Path, engine: str = "joblib") -> None:
     """
     Save a trained model to disk.
 
@@ -215,19 +211,16 @@ def save_model(
     filepath = Path(filepath)
     filepath.parent.mkdir(parents=True, exist_ok=True)
 
-    if engine == 'joblib':
+    if engine == "joblib":
         joblib.dump(model, filepath)
-    elif engine == 'pickle':
-        with open(filepath, 'wb') as f:
+    elif engine == "pickle":
+        with open(filepath, "wb") as f:
             pickle.dump(model, f)
     else:
         raise ValueError(f"Unsupported engine: {engine}")
 
 
-def load_model(
-    filepath: Union[str, Path],
-    engine: str = 'joblib'
-) -> Any:
+def load_model(filepath: str | Path, engine: str = "joblib") -> Any:
     """
     Load a trained model from disk.
 
@@ -245,10 +238,10 @@ def load_model(
     """
     filepath = Path(filepath)
 
-    if engine == 'joblib':
+    if engine == "joblib":
         return joblib.load(filepath)
-    if engine == 'pickle':
-        with open(filepath, 'rb') as f:
+    if engine == "pickle":
+        with open(filepath, "rb") as f:
             return pickle.load(f)
     else:
         raise ValueError(f"Unsupported engine: {engine}")

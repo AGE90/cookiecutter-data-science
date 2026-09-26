@@ -6,9 +6,9 @@ This guide provides detailed instructions for using the **{{ cookiecutter.projec
 
 ### Installation
 
-1. Install Poetry (if not already installed):
+1. Install uv (if not already installed):
    ```bash
-   curl -sSL https://install.python-poetry.org | python3 -
+   curl -LsSf https://astral.sh/uv/install.sh | sh
    ```
 
 2. Clone the repository:
@@ -19,12 +19,12 @@ This guide provides detailed instructions for using the **{{ cookiecutter.projec
 
 3. Install dependencies:
    ```bash
-   poetry install
+   uv sync
    ```
 
-4. Activate the Poetry environment:
+4. Activate the virtual environment:
    ```bash
-   poetry shell
+   source .venv/bin/activate
    ```
 
 ### Project Structure
@@ -103,7 +103,7 @@ model = train_model(
 
 View MLflow dashboard:
 ```bash
-poetry run mlflow ui
+uv run mlflow ui
 ```
 
 ### Visualization
@@ -124,18 +124,11 @@ plot_results(
 )
 ```
 
-#### Interactive Dashboards
-
-Run Streamlit dashboard:
-```bash
-poetry run streamlit run src/{{ cookiecutter.module_name }}/visualization/dashboard.py
-```
-
 ### Jupyter Notebooks
 
 1. Start Jupyter Lab:
    ```bash
-   poetry run jupyter lab
+   uv run --with jupyterlab jupyter lab
    ```
 
 2. Create new notebooks in `notebooks/`
@@ -151,19 +144,13 @@ poetry run streamlit run src/{{ cookiecutter.module_name }}/visualization/dashbo
 ### Running Tests
 
 ```bash
-poetry run pytest
-```
-
-### Building Documentation
-
-```bash
-poetry run mkdocs build
+uv run pytest
 ```
 
 ### Updating Dependencies
 
 ```bash
-poetry update
+uv lock --upgrade && uv sync
 ```
 
 ## Troubleshooting
@@ -171,7 +158,7 @@ poetry update
 ### Common Issues
 
 1. **Module Not Found**
-   - Ensure you're in the Poetry environment
+   - Ensure you're running commands with `uv run` (or the `.venv` is activated)
    - Check if the module is installed
    - Verify import paths
 

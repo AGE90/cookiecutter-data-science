@@ -8,10 +8,9 @@ Welcome to the **{{ cookiecutter.project_name }}** installation guide! This guid
 
 Make sure you have the following installed before proceeding:
 
-- **Python**: Version >= 3.9
-- **Poetry**: Latest version (for dependency management)
+- **uv**: Latest version (manages Python, the virtual environment and dependencies)
 
-To install Poetry, follow the [official installation guide](https://python-poetry.org/docs/#installation).
+To install uv, follow the [official installation guide](https://docs.astral.sh/uv/getting-started/installation/). uv installs Python {{ cookiecutter.python_version }} for you if it is missing.
 
 ---
 
@@ -26,18 +25,18 @@ cd {{ cookiecutter.project_slug }}
 
 ---
 
-## 2. Install Dependencies with Poetry
+## 2. Install Dependencies with uv
 
-Poetry will automatically create a virtual environment and install all dependencies. Run the following command in your project root:
+uv will automatically create a virtual environment in `.venv` and install all dependencies. Run the following command in your project root:
 
 ```bash
-poetry install
+uv sync
 ```
 
-This will install all dependencies defined in `pyproject.toml`, including:
+This installs every dependency group defined in `pyproject.toml` (the project sets `default-groups = "all"`), including:
 
 - Core dependencies
-- Development tools (black, ruff, mypy, etc.)
+- Development tools (ruff, mypy, pre-commit)
 - Data science packages (pandas, scikit-learn, etc.)
 - Visualization tools (matplotlib, seaborn, etc.)
 - Testing frameworks (pytest, etc.)
@@ -48,29 +47,29 @@ You can install specific dependency groups if needed:
 
 ```bash
 # Install only development dependencies
-poetry install --with dev
+uv sync --no-default-groups --group dev
 
 # Install data science and visualization dependencies
-poetry install --with data-science,viz
+uv sync --no-default-groups --group data-science --group viz
 
-# Install all groups same as 'poetry install'
-poetry install --with dev,test,notebook,data-science,viz
+# Install all groups same as 'uv sync'
+uv sync --all-groups
 ```
 
 ---
 
-## 3. Activate the Poetry Environment
+## 3. Activate the Virtual Environment
 
-To activate the Poetry virtual environment:
+To activate the virtual environment:
 
 ```bash
-poetry env activate
+source .venv/bin/activate
 ```
 
 Or run commands directly using:
 
 ```bash
-poetry run <command>
+uv run <command>
 ```
 
 ---
@@ -82,7 +81,7 @@ poetry run <command>
 Install pre-commit hooks:
 
 ```bash
-poetry run pre-commit install
+uv run pre-commit install
 ```
 
 This activates pre-commit hooks defined in .pre-commit-config.yaml for your project, ensuring code quality checks run on every commit.
@@ -92,13 +91,13 @@ This activates pre-commit hooks defined in .pre-commit-config.yaml for your proj
 If you plan to use Jupyter notebooks, install the notebook group:
 
 ```bash
-poetry install --with notebook
+uv sync --no-default-groups --group notebook
 ```
 
 To launch JupyterLab:
 
 ```bash
-poetry run jupyter lab
+uv run --with jupyterlab jupyter lab
 ```
 
 ### Set Up Plotly for JupyterLab (Optional)
@@ -106,10 +105,10 @@ poetry run jupyter lab
 Install the required JupyterLab extensions for Plotly:
 
 ```bash
-poetry run jupyter labextension install @jupyter-widgets/jupyterlab-manager@0.36 --no-build
-poetry run jupyter labextension install plotlywidget@0.2.1 --no-build
-poetry run jupyter labextension install @jupyterlab/plotly-extension@0.16 --no-build
-poetry run jupyter lab build
+uv run --with jupyterlab jupyter labextension install @jupyter-widgets/jupyterlab-manager@0.36 --no-build
+uv run --with jupyterlab jupyter labextension install plotlywidget@0.2.1 --no-build
+uv run --with jupyterlab jupyter labextension install @jupyterlab/plotly-extension@0.16 --no-build
+uv run --with jupyterlab jupyter lab build
 ```
 
 ---
@@ -121,7 +120,7 @@ poetry run jupyter lab build
 If you selected DVC during project creation:
 
 ```bash
-poetry run dvc init
+uv run dvc init
 ```
 
 ### MLflow
@@ -129,30 +128,18 @@ poetry run dvc init
 If you selected MLflow during project creation, the tracking server will be available at `http://localhost:5000`:
 
 ```bash
-poetry run mlflow ui
+uv run mlflow ui
 ```
 
 ---
 
-## 6. Managing Project Tasks with Invoke
+## 6. Managing Project Tasks with Make
 
-We use **[Invoke](http://www.pyinvoke.org/)** as a task runner for common project management tasks.
-
-### List Available Tasks
+Common tasks are defined in the `Makefile`. List them with:
 
 ```bash
-poetry run invoke -l
+make help
 ```
-
-### Get Help on a Specific Task
-
-```bash
-poetry run invoke --help <task-name>
-```
-
-### Adding Custom Tasks
-
-To add your own tasks, edit the `tasks.py` file in your project root.
 
 ---
 
@@ -161,38 +148,24 @@ To add your own tasks, edit the `tasks.py` file in your project root.
 Run the test suite using pytest:
 
 ```bash
-poetry run pytest
+uv run pytest
 ```
 
 For coverage reports:
 
 ```bash
-poetry run pytest --cov=src
+uv run pytest --cov=src
 ```
 
 ---
-
-## 8. Documentation
-
-Build the documentation:
-
-```bash
-poetry run mkdocs build
-```
-
-Serve the documentation locally:
-
-```bash
-poetry run mkdocs serve
-```
 
 ---
 
 ## Final Notes
 
-- Always use `poetry run` to execute commands within the project's virtual environment
-- Use `poetry add <package>` to add new dependencies
-- Use `poetry update` to update dependencies
+- Always use `uv run` to execute commands within the project's virtual environment
+- Use `uv add <package>` to add new dependencies
+- Use `uv lock --upgrade && uv sync` to update dependencies
 - Check `pyproject.toml` for all available dependency groups and their purposes
 
 You're now all set to start developing with **{{ cookiecutter.project_name }}**!

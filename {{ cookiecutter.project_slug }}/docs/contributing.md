@@ -36,8 +36,8 @@ Please read and follow our [Code of Conduct](code_of_conduct.md).
 
 ### Prerequisites
 
-- Python >= 3.9
-- Poetry
+- Python >= {{ cookiecutter.python_version }}
+- uv
 - Git
 - A code editor
 
@@ -56,12 +56,12 @@ Please read and follow our [Code of Conduct](code_of_conduct.md).
 
 3. Install dependencies:
    ```bash
-   poetry install
+   uv sync
    ```
 
 4. Install pre-commit hooks:
    ```bash
-   poetry run pre-commit install
+   uv run pre-commit install
    ```
 
 ### Development Workflow
@@ -81,10 +81,10 @@ Please read and follow our [Code of Conduct](code_of_conduct.md).
 3. Make your changes
 4. Run tests and formatters:
    ```bash
-   poetry run pytest
-   poetry run black .
-   poetry run ruff check .
-   poetry run mypy src
+   uv run pytest
+   uv run ruff format .
+   uv run ruff check .
+   uv run mypy src
    ```
 
 5. Commit your changes:

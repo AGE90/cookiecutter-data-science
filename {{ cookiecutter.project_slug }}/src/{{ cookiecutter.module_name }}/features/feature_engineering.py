@@ -2,16 +2,12 @@
 Feature engineering utilities for the project.
 """
 
-from typing import List, Optional
-
 import pandas as pd
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 
 def scale_features(
-    df: pd.DataFrame,
-    columns: List[str],
-    scaler: Optional[StandardScaler] = None
+    df: pd.DataFrame, columns: list[str], scaler: StandardScaler | None = None
 ) -> tuple[pd.DataFrame, StandardScaler]:
     """
     Scale numerical features using StandardScaler.
@@ -43,9 +39,9 @@ def scale_features(
 
 def encode_categorical(
     df: pd.DataFrame,
-    columns: List[str],
-    encoder: Optional[OneHotEncoder] = None,
-    drop: str = 'first'
+    columns: list[str],
+    encoder: OneHotEncoder | None = None,
+    drop: str = "first",
 ) -> tuple[pd.DataFrame, OneHotEncoder]:
     """
     One-hot encode categorical features.
@@ -74,19 +70,14 @@ def encode_categorical(
 
     encoded = encoder.transform(df[columns])
     encoded_df = pd.DataFrame(
-        encoded,
-        columns=encoder.get_feature_names_out(columns),
-        index=df.index
+        encoded, columns=encoder.get_feature_names_out(columns), index=df.index
     )
 
     df_encoded = df.drop(columns=columns).join(encoded_df)
     return df_encoded, encoder
 
 
-def create_time_features(
-    df: pd.DataFrame,
-    datetime_column: str
-) -> pd.DataFrame:
+def create_time_features(df: pd.DataFrame, datetime_column: str) -> pd.DataFrame:
     """
     Create time-based features from a datetime column.
 
@@ -106,19 +97,17 @@ def create_time_features(
     df_time[datetime_column] = pd.to_datetime(df_time[datetime_column])
 
     # Extract time components
-    df_time[f'{datetime_column}_year'] = df_time[datetime_column].dt.year
-    df_time[f'{datetime_column}_month'] = df_time[datetime_column].dt.month
-    df_time[f'{datetime_column}_day'] = df_time[datetime_column].dt.day
-    df_time[f'{datetime_column}_hour'] = df_time[datetime_column].dt.hour
-    df_time[f'{datetime_column}_dayofweek'] = df_time[datetime_column].dt.dayofweek
+    df_time[f"{datetime_column}_year"] = df_time[datetime_column].dt.year
+    df_time[f"{datetime_column}_month"] = df_time[datetime_column].dt.month
+    df_time[f"{datetime_column}_day"] = df_time[datetime_column].dt.day
+    df_time[f"{datetime_column}_hour"] = df_time[datetime_column].dt.hour
+    df_time[f"{datetime_column}_dayofweek"] = df_time[datetime_column].dt.dayofweek
 
     return df_time
 
 
 def create_interaction_features(
-    df: pd.DataFrame,
-    columns: List[str],
-    operation: str = 'multiply'
+    df: pd.DataFrame, columns: list[str], operation: str = "multiply"
 ) -> pd.DataFrame:
     """
     Create interaction features between columns.
@@ -130,7 +119,8 @@ def create_interaction_features(
     columns : list of str
         List of columns to create interactions from.
     operation : str, optional
-        Operation to perform ('multiply', 'add', 'subtract', 'divide'). Default is 'multiply'.
+        Operation to perform ('multiply', 'add', 'subtract', 'divide').
+        Default is 'multiply'.
 
     Returns
     -------
@@ -140,14 +130,14 @@ def create_interaction_features(
     df_interact = df.copy()
 
     for i, col1 in enumerate(columns):
-        for col2 in columns[i + 1:]:
-            if operation == 'multiply':
-                df_interact[f'{col1}_{col2}_product'] = df[col1] * df[col2]
-            elif operation == 'add':
-                df_interact[f'{col1}_{col2}_sum'] = df[col1] + df[col2]
-            elif operation == 'subtract':
-                df_interact[f'{col1}_{col2}_diff'] = df[col1] - df[col2]
-            elif operation == 'divide':
-                df_interact[f'{col1}_{col2}_ratio'] = df[col1] / df[col2]
+        for col2 in columns[i + 1 :]:
+            if operation == "multiply":
+                df_interact[f"{col1}_{col2}_product"] = df[col1] * df[col2]
+            elif operation == "add":
+                df_interact[f"{col1}_{col2}_sum"] = df[col1] + df[col2]
+            elif operation == "subtract":
+                df_interact[f"{col1}_{col2}_diff"] = df[col1] - df[col2]
+            elif operation == "divide":
+                df_interact[f"{col1}_{col2}_ratio"] = df[col1] / df[col2]
 
     return df_interact

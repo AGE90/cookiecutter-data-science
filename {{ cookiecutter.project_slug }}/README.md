@@ -18,29 +18,27 @@ Please read [install.md](docs/install.md) for details on how to set up this proj
 
 ## Key Features
 
-- **Dependency Management**: Using Poetry for reliable dependency management
+- **Dependency Management**: Using uv for fast, reproducible dependency management
 - **Data Version Control**: Optional DVC integration for data versioning
 - **ML Experiment Tracking**: Optional MLflow integration for experiment tracking
-- **Interactive Dashboards**: Optional Streamlit integration for creating dashboards
 - **Jupyter Support**: Full support for Jupyter notebooks
-- **Code Quality**: Pre-configured with black, ruff, and mypy
+- **Code Quality**: Pre-configured with ruff (lint + format), mypy and pre-commit
 - **Testing**: pytest setup with coverage reporting
-- **Documentation**: MkDocs setup with Material theme
 
 ### Quick Start
 
-1. Install Poetry (see [Installation Guide](docs/install.md))
+1. Install uv (see [Installation Guide](docs/install.md))
 2. Clone the repository
 3. Install dependencies:
 
    ```bash
-   poetry install
+   uv sync
    ```
 
 4. Activate the environment:
 
    ```bash
-   poetry env activate
+   source .venv/bin/activate
    ```
 
 ---

@@ -7,7 +7,7 @@ Validates that the module name and slug adhere to Python naming conventions:
 
 Also normalizes the names and displays the derived values.
 
-Uses Colorama for cross-platform colored output.
+Uses plain ANSI escape codes for colored output (stdlib only).
 """
 
 import keyword
@@ -15,11 +15,6 @@ import re
 import sys
 from pathlib import Path
 from urllib.parse import urlparse
-
-from colorama import Fore, Style, just_fix_windows_console
-
-# --- Initialize Colorama (Windows-safe) ---
-just_fix_windows_console()
 
 # Cookiecutter variables (filled in based on user input)
 PROJECT_NAME = "{{ cookiecutter.project_name }}"
@@ -32,10 +27,10 @@ PYTHON_VERSION = "{{ cookiecutter.python_version }}"
 # --- Constants ---
 MODULE_REGEX = r'^[_a-zA-Z][_a-zA-Z0-9]*$'
 EMAIL_REGEX = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-PYTHON_VERSION_REGEX = r'^3\.(?:[0-9]|1[0-1])$'
-ERROR_COLOR = Fore.RED
-INFO_COLOR = Fore.CYAN
-RESET_ALL = Style.RESET_ALL
+PYTHON_VERSION_REGEX = r'^3\.\d{1,2}$'
+ERROR_COLOR = "\033[31m"
+INFO_COLOR = "\033[36m"
+RESET_ALL = "\033[0m"
 
 # --- Helpers ---
 def validate_module(name: str) -> None:
@@ -108,7 +103,7 @@ def validate_python_version(version: str) -> None:
     """
     if not re.match(PYTHON_VERSION_REGEX, version):
         print(f"{ERROR_COLOR} ERROR: Invalid Python version format: {version}{RESET_ALL}")
-        print(f"{INFO_COLOR} Version must be in format '3.x' where x is 0-11{RESET_ALL}")
+        print(f"{INFO_COLOR} Version must be in format '3.x' where x is the minor version{RESET_ALL}")
         sys.exit(1)
     print(f"{INFO_COLOR} Valid Python version: {version}{RESET_ALL}")
 

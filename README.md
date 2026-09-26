@@ -6,7 +6,9 @@ A **Cookiecutter** template to jumpstart data science projects with a well-organ
 
 ## Features
 
-- **Modern Python Development**: Using Poetry for dependency management
+- **Modern Python Development**: Using [uv](https://docs.astral.sh/uv/) for fast, reproducible dependency management
+- **Code Quality**: ruff (lint + format), mypy and pre-commit, passing out of the box
+- **Claude Code Skill**: Scaffold a project by asking Claude, in one command, without Claude writing the files ([see below](#claude-code-skill))
 - **Data Science Tools**: Incorporates popular data science libraries
 - **Development Tools**: Code quality tools and testing frameworks
 - **Project Structure**: Organized directory structure for data science projects
@@ -17,34 +19,83 @@ A **Cookiecutter** template to jumpstart data science projects with a well-organ
 
 ## Requirements
 
-Before using the Cookiecutter template, ensure you have the following installed in your system:
-
-- **Python 3.9+**
-- **[Cookiecutter Python package](https://cookiecutter.readthedocs.io/en/latest/installation.html)**
-- **Poetry**: For dependency management and packaging
+- **[uv](https://docs.astral.sh/uv/getting-started/installation/)**: runs Cookiecutter (via `uvx`), installs Python and manages the project's dependencies
 - **Git** (optional, for version control)
 
-You can install the Cookiecutter package via `pip`:
-
 ```bash
-pip install cookiecutter
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-It is also recommended to have **Poetry** installed for managing project dependencies. You can install Poetry by following the instructions on the [Poetry website](https://python-poetry.org/docs/#installation).
+No separate Cookiecutter install is needed: `uvx cookiecutter ...` runs it in a throwaway environment. If you prefer, `pip install cookiecutter` works too.
 
 ---
 
 ## How to Start a New Project
 
-1. **Navigate to the folder** where you want to create your new project.
+### Interactive
 
-2. **Run Cookiecutter** with the following command to generate a new project from this template:
+From the folder where you want the new project:
 
-    ```bash
-    cookiecutter https://github.com/AGE90/cookiecutter-data-science.git
-    ```
+```bash
+uvx cookiecutter gh:AGE90/cookiecutter-data-science
+```
 
-3. **Follow the prompts**: Cookiecutter will ask you a series of questions (e.g., project name, author, etc.) and create a customized project structure based on your responses.
+Cookiecutter asks for each option (project name, author, etc.) and creates the project. The post-generation hook then pins Python, adds every dependency group with `uv add`, and initializes Git and DVC if selected.
+
+### Non-interactive
+
+Pass the options on the command line and skip the prompts. Any option you leave out uses its default:
+
+```bash
+uvx cookiecutter gh:AGE90/cookiecutter-data-science --no-input \
+  project_name="Churn Model" \
+  author_name="Jane Doe" author_email="jane@example.com" \
+  use_mlflow=yes use_dvc=no
+```
+
+### Next steps
+
+```bash
+cd churn-model
+make help     # list all tasks
+make check    # ruff format + ruff check + mypy
+make test     # pytest with coverage
+```
+
+---
+
+## Claude Code Skill
+
+The repo ships a [Claude Code](https://claude.com/claude-code) skill in [`skill/ds-project/SKILL.md`](skill/ds-project/SKILL.md) that lets Claude create projects from this template.
+
+### How it works
+
+The skill does **not** contain the template files. It tells Claude to work out the options from your request and run the single non-interactive `cookiecutter` command shown above. Cookiecutter writes the files, not Claude, so:
+
+- **Low token cost:** Claude reads one short skill file and runs one command, instead of writing ~55 files.
+- **Same result every time:** projects are identical to the ones you'd get by running Cookiecutter yourself.
+- **One source of truth:** improving the template improves the skill; there is nothing to keep in sync.
+
+Every generated project also includes a `CLAUDE.md` with the project conventions (data folders, path helpers, `uv run`, make targets), so Claude follows them when working inside the project later.
+
+### Install
+
+Link the skill into your personal skills folder, so it updates whenever you `git pull` this repo:
+
+```bash
+git clone https://github.com/AGE90/cookiecutter-data-science.git
+ln -s "$PWD/cookiecutter-data-science/skill/ds-project" ~/.claude/skills/ds-project
+```
+
+(Or copy the folder instead of linking it.)
+
+### Use
+
+Start Claude Code in the folder where the project should go and ask for it, e.g.:
+
+> Create a data science project called "Churn Model" to predict customer churn, with MLflow but no DVC. Add xgboost.
+
+Or invoke it directly with `/ds-project`. Claude asks only for what it can't infer (usually just the name), takes your author details from `git config`, runs the command and reports the created path.
 
 ---
 
@@ -54,10 +105,13 @@ This template provides a well-structured project layout with the following direc
 
 ```text
 .
-├── LICENSE
+├── LICENSE                <- Omitted when "No license file" is selected.
 ├── README.md              <- The top-level README for developers using this project.
 ├── CHANGELOG.md           <- A changelog to track project updates and versions.
-├── pyproject.toml         <- Project configuration file (replaces setup.py and requirements.txt).
+├── CLAUDE.md              <- Project conventions for Claude Code.
+├── pyproject.toml         <- Project metadata, dependency groups and tool configuration.
+├── uv.lock                <- Locked dependency versions (commit it).
+├── .python-version        <- Python version pinned by uv.
 ├── .gitignore             <- Specifies intentionally untracked files to ignore.
 ├── Makefile               <- Automate common tasks like testing, running, or setting up.
 ├── .env                   <- Environment variables (ignored by git).
@@ -100,7 +154,7 @@ This template provides a well-structured project layout with the following direc
 │       │   ├── data_loader.py
 │       │   └── make_dataset.py
 │       ├── features       <- Scripts to turn raw data into features for modeling.
-│       │   ├── feature_enineering.py
+│       │   ├── feature_engineering.py
 │       │   └── build_features.py
 │       ├── models         <- Scripts to train models and then use trained models to make predictions.
 │       │   ├── model_utils.py
@@ -115,6 +169,7 @@ This template provides a well-structured project layout with the following direc
     ├── conftest.py        <- Shared pytest fixtures.
     ├── e2e/               <- End-to-end or integration tests.
     └── unit/              <- Unit tests, mirroring src structure.
+        └── test_paths.py  <- Starter test, so `make test` passes out of the box.
 ```
 
 ---
@@ -155,19 +210,19 @@ The option `project_version` is used as the initial version of the project in th
 
 ### Python Version
 
-The option `python_version` is used as the minimum Python version required for the project in the `pyproject.toml` file. It should be a valid Python version number (e.g., "3.11").
+The option `python_version` is used as the minimum Python version required for the project (`requires-python` in `pyproject.toml`), the ruff target version and the version pinned by uv in `.python-version`. It must have the format `3.X` (e.g., "3.12").
 
 ### License Selection
 
-The option `license_selection` is used to select the license for your project. It should be one of the following options:
+The option `license` is used to select the license for your project. It should be one of the following options:
 
 - `MIT`: The MIT License.
 - `BSD-3-Clause`: The BSD 3-Clause License.
-- No licence file: If you do not want to include a license file, select "No licence file".
+- `No license file`: No `LICENSE` file is created and no `license` field is set in `pyproject.toml`.
 
-### Initialize Poetry Environment
+### Initialize Environment
 
-The option `initialize_poetry_env` is used to determine whether to initialize a Poetry environment for the project. If selected, it will create a virtual environment and set up the project with Poetry.
+The option `initialize_env` is used to determine whether to set up the uv environment. If selected, the post-generation hook pins the Python version, adds every dependency group below with `uv add` (creating `.venv` and `uv.lock`) and creates an empty `.env` file. Select `no` to only generate the files; you can run `make install` later.
 
 ### Project Dependencies
 
@@ -175,11 +230,11 @@ The option `project_dependencies` is used to specify the base project dependenci
 
 ### Development Dependencies
 
-The option `development_dependencies` is used to specify the development dependencies. The packages `[mypy, ruff, black, pre-commit]` are always included. You can add more if you want by entering a list of Python packages separated by commas.
+The option `development_dependencies` is used to specify the development dependencies. They are added to the `dev` group. By default it is set to `[mypy, ruff, pre-commit]`; keep these, since the Makefile and pre-commit hooks use them.
 
 ### Notebook Dependencies
 
-The option `notebook_dependencies` is used to specify the notebook dependencies such as `jupyter`, `jupyterlab`, `ipywidgets`, etc. By default its set to `[ipywidgets]`.
+The option `notebook_dependencies` is used to specify the notebook dependencies such as `jupyter`, `jupyterlab`, `ipywidgets`, etc. By default its set to `[ipykernel]`. `make notebook` runs Jupyter Lab on demand, so it doesn't need to be installed.
 
 ### Data Science Dependencies
 
@@ -195,15 +250,15 @@ The option `testing_dependencies` is used to specify the testing dependencies. B
 
 ### Use MLFlow
 
-The option `use_mlflow` is used to determine whether to use MLFlow for experiment tracking and model deployment. If selected, it will install the necessary dependencies and configure MLFlow for your project.
+The option `use_mlflow` is used to determine whether to use MLFlow for experiment tracking and model deployment. If selected, `mlflow` is added to the `data-science` group. Start the UI with `make mlflow-ui`.
 
 ### Use DVC
 
-The option `use_dvc` is used to determine whether to use DVC for data versioning and management. If selected, it will install the necessary dependencies and configure DVC for your project.
+The option `use_dvc` is used to determine whether to use DVC for data versioning and management. If selected, `dvc` is added to the `data-science` group and `dvc init` is run. `dvc init` needs a Git repository, so it only runs when `initialize_env` and `initialize_git_repository` are both `yes`.
 
 ### Initialize Git Repository
 
-The option `initialize_git_repo` is used to determine whether to initialize a Git repository for the project. If selected, it will initialize a Git repository and commit the initial files.
+The option `initialize_git_repository` is used to determine whether to initialize a Git repository for the project. If selected, it will initialize a Git repository and commit the initial files.
 
 ---
 
@@ -214,12 +269,18 @@ Contributions are welcome! If you'd like to improve this template or add new fea
 1. Fork the repository.
 2. Create a new branch for your feature (`git checkout -b feature/your-feature`).
 3. Make your changes.
-4. Submit a pull request.
+4. Run the template tests (they render the template with several option combinations and check the output):
+
+    ```bash
+    uvx --with cookiecutter pytest tests/
+    ```
+
+5. Submit a pull request.
 
 ---
 
 ## Support
 
-If you encounter any issues or have questions, feel free to open an issue on the [GitHub repository](https://github.com/AGE90/-cookiecutter-data-science/issues).
+If you encounter any issues or have questions, feel free to open an issue on the [GitHub repository](https://github.com/AGE90/cookiecutter-data-science/issues).
 
 ---

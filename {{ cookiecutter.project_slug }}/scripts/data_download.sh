@@ -24,7 +24,7 @@ check_command() {
 
 # Check prerequisites
 print_message "$YELLOW" "🔍 Checking prerequisites..."
-check_command "poetry"
+check_command "uv"
 check_command "curl"
 check_command "wget"
 
@@ -57,7 +57,7 @@ download_kaggle() {
     local description=$3
 
     print_message "$YELLOW" "📥 Downloading $description from Kaggle..."
-    poetry run kaggle datasets download -d "$dataset" -p "$output_dir" --unzip
+    uv run --with kaggle kaggle datasets download -d "$dataset" -p "$output_dir" --unzip
     print_message "$GREEN" "✅ Downloaded $description"
 }
 
